@@ -1,0 +1,3693 @@
+/* =====================================================================
+   LUDIK.NC - Système de design
+   ---------------------------------------------------------------------
+   Organisation du fichier :
+     1. Polices
+     2. Jetons (couleurs, typographie, espacements, rayons, ombres)
+     3. Socle (corps de page, titres, liens, focus, motif de fond)
+     4. Primitives (boutons, badges, surfaces, champs, icônes)
+     5. Composants (en-tête, navigation, fil d'Ariane, diaporama, tuiles,
+        vignette produit, colonne de rayon, réassurance, pied de page)
+     6. Pages (accueil, rayon, produit, éditorial, panier, tunnel)
+     7. Utilitaires
+   Les règles de composition sont documentées dans docs/DESIGN.md.
+   ===================================================================== */
+
+/* =====================================================================
+   1. POLICES
+   ===================================================================== */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 500 800;
+  font-display: swap;
+  src: url('../fonts/outfit-latin-var.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 500 800;
+  font-display: swap;
+  src: url('../fonts/outfit-latin-ext-var.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* police manuscrite : accroches de l'en-tête et du pied de page */
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+  src: url('../fonts/caveat-latin-var.woff2') format('woff2');
+}
+
+/* =====================================================================
+   2. JETONS
+   ===================================================================== */
+:root {
+  /* --- Vert pétrole : en-tête, pied de page, icônes, titres.
+         Valeurs de référence des maquettes : 087C73 pour l'action,
+         063F3D pour les surfaces sombres, 033330 pour le pied de page. --- */
+  --lud-green-50:  #e8f5f2;
+  --lud-green-100: #d3ebe6;
+  --lud-green-200: #a9d8d0;
+  --lud-green-300: #74bdb2;
+  --lud-green-400: #3d9d92;
+  --lud-green-500: #0a8a7f;
+  --lud-green-600: #007a70;
+  --lud-green-700: #005f57;
+  --lud-green-800: #003d3a;
+  --lud-green-900: #033330;
+  --lud-green-950: #022825;
+
+  /* --- Jaune Ludik : actions, points d'appel --- */
+  --lud-gold-100: #fff8e5;
+  --lud-gold-200: #ffedbe;
+  --lud-gold-300: #fedc7f;
+  --lud-gold-400: #fecb4a;
+  --lud-gold-500: #ffbf18;
+  --lud-gold-600: #f2a900;
+
+  /* --- Neutres chauds : fonds, bordures, textes --- */
+  --lud-paper: #faf9f5;
+  --lud-surface: #ffffff;
+  --lud-surface-alt: #f7f8f5;
+  --lud-line: #e9ede9;
+  --lud-line-strong: #d0d8d2;
+  --lud-ink: #102f2e;
+  --lud-ink-soft: #667876;
+  --lud-ink-mute: #8a9997;
+
+  /* --- Textes sur fond vert sombre (en-tête, pied de page) --- */
+  --lud-on-dark: #f2f8f6;
+  --lud-on-dark-soft: #a8c8c3;
+  --lud-on-dark-mute: #7e9c98;
+
+  /* --- États --- */
+  --lud-stock: #19a85b;
+  --lud-stock-bg: #e7f7ee;
+  --lud-warn: #b07d1a;
+  --lud-warn-bg: #fdf3e0;
+  --lud-alert: #b3402c;
+  --lud-alert-bg: #fdeceb;
+  --lud-promo: #e2622a;
+
+  /* --- Accents d'univers.
+         Une couleur par rayon, mais désaturée : à pleine saturation, six
+         teintes vives sur la même rangée tiraient l'œil plus que les produits.
+         Elles ne servent qu'au pictogramme et au nombre de produits, jamais à
+         un fond de carte ni à une bordure. --- */
+  --lud-uni-societe: #a9682f;
+  --lud-uni-societe-bg: #f7f2ea;
+  --lud-uni-tcg: #40718c;
+  --lud-uni-tcg-bg: #eef2f5;
+  --lud-uni-manga: #9c6079;
+  --lud-uni-manga-bg: #f7f0f3;
+  --lud-uni-jdr: #6b5f8c;
+  --lud-uni-jdr-bg: #f2f1f6;
+  --lud-uni-bd: #4a6a8c;
+  --lud-uni-bd-bg: #eef1f5;
+  --lud-uni-creatif: #4a8069;
+  --lud-uni-creatif-bg: #eef4f1;
+
+  /* --- Typographie --- */
+  --lud-font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --lud-font-title: 'Outfit', 'Inter', system-ui, sans-serif;
+  --lud-font-script: 'Caveat', 'Outfit', cursive;
+
+  /* Échelle relevée d'environ 12 % par rapport à la V1 : le site
+     paraissait dézoomé, les composants n'occupaient pas l'écran. */
+  --lud-text-xs: .8125rem;    /* 13 px - mentions, badges */
+  --lud-text-sm: .875rem;     /* 14 px - texte secondaire, plancher */
+  --lud-text-base: 1rem;      /* 16 px - texte courant */
+  --lud-text-md: 1.0625rem;   /* 17 px - libellés forts */
+  --lud-text-lg: 1.25rem;     /* 20 px - chapô */
+  --lud-title-sm: 1.375rem;   /* 22 px - titre de bloc (H3) */
+  --lud-title-md: 2.125rem;   /* 34 px - titre de section (H2) */
+  --lud-title-lg: 2.375rem;   /* 38 px - titre de page (H1) */
+  --lud-title-xl: 3rem;       /* 48 px - titre de campagne */
+
+  /* --- Trame : multiples de 4 px --- */
+  --lud-s1: .25rem;
+  --lud-s2: .5rem;
+  --lud-s3: .75rem;
+  --lud-s4: 1rem;
+  --lud-s5: 1.25rem;
+  --lud-s6: 1.5rem;
+  --lud-s8: 2rem;
+  --lud-s10: 2.5rem;
+  --lud-s12: 3rem;
+  --lud-s16: 4rem;
+  /* Écart entre deux grandes sections : 40 px sur petit écran, 68 px sur
+     grand. Il était de 56 à 100 px ; les sections semblaient flotter
+     séparément plutôt que former une page. */
+  --lud-section: clamp(2.5rem, 4vw, 4.25rem);
+
+  /* --- Rayons --- */
+  --lud-r-sm: .5rem;      /*  8 px - champs, petits badges */
+  --lud-r-md: .875rem;    /* 14 px - boutons, cartes produit */
+  --lud-r-lg: 1.125rem;   /* 18 px - cartes de section */
+  --lud-r-xl: 1.5rem;     /* 24 px - campagnes, grands blocs */
+  --lud-r-pill: 999px;
+
+  /* --- Ombres : très douces, jamais de Material --- */
+  /* Les surfaces sont détachées par l'ombre, pas par un filet : un contour
+     d'un pixel sur chaque carte donnait un rendu de tableau. --lud-line ne
+     sert plus qu'aux séparateurs internes et aux champs de formulaire. */
+  --lud-shadow-sm: 0 1px 2px rgba(10, 55, 52, .04), 0 4px 12px -6px rgba(10, 55, 52, .08);
+  --lud-shadow-md: 0 2px 4px rgba(10, 55, 52, .04), 0 10px 24px -10px rgba(10, 55, 52, .12);
+  --lud-shadow-lg: 0 4px 8px rgba(10, 55, 52, .05), 0 20px 40px -16px rgba(10, 55, 52, .18);
+
+  /* --- Gabarit --- */
+  --lud-page: 1360px;
+  --lud-gutter: clamp(1.25rem, 3vw, 3rem);
+  --lud-nav-h: 3.25rem;
+  --lud-head-h: 5.5rem;
+
+  /* --- Transitions : micro-interactions uniquement --- */
+  --lud-ease: 160ms ease;
+
+  /* --- Correspondances Bootstrap 5 utilisées par Hummingbird --- */
+  --bs-primary: #007a70;
+  --bs-primary-rgb: 0, 122, 112;
+  --bs-secondary: #ffbf18;
+  --bs-secondary-rgb: 255, 191, 24;
+  --bs-body-bg: #faf9f5;
+  --bs-body-bg-rgb: 250, 249, 245;
+  --bs-body-color: #2b4241;
+  --bs-body-color-rgb: 43, 66, 65;
+  --bs-body-font-size: 1rem;
+  --bs-emphasis-color: #102f2e;
+  --bs-heading-color: #102f2e;
+  --bs-link-color: #007a70;
+  --bs-link-color-rgb: 0, 122, 112;
+  --bs-link-hover-color: #003d3a;
+  --bs-border-color: #e3e8e4;
+  --bs-border-radius: .75rem;
+  --bs-border-radius-sm: .5rem;
+  --bs-border-radius-lg: 1.125rem;
+  --bs-border-radius-xl: 1.5rem;
+  --bs-font-sans-serif: var(--lud-font);
+
+}
+
+/* Bootstrap fait dériver le fond de plusieurs composants de --bs-body-bg, qui
+   vaut ici le crème de la page. Posés sur une carte blanche, ces composants
+   affichaient un aplat crème disgracieux - c'était le cas de la fiche
+   technique du produit. Ces variables sont déclarées par Bootstrap sur la
+   classe du composant, pas sur :root : c'est donc là qu'il faut les reprendre,
+   sinon la déclaration de Bootstrap l'emporte. */
+.accordion {
+  --bs-accordion-bg: transparent;
+  --bs-accordion-btn-bg: transparent;
+  --bs-accordion-active-bg: transparent;
+}
+.card { --bs-card-bg: var(--lud-surface); }
+.modal { --bs-modal-bg: var(--lud-surface); }
+.dropdown-menu { --bs-dropdown-bg: var(--lud-surface); }
+.offcanvas, .offcanvas-xl { --bs-offcanvas-bg: var(--lud-surface); }
+.toast { --bs-toast-bg: var(--lud-surface); }
+.popover { --bs-popover-bg: var(--lud-surface); }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --lud-ease: 1ms linear; }
+}
+
+/* Sur un téléphone, l'écart entre grandes sections se resserre : à 56 px il
+   fallait deux gestes de défilement pour passer d'un bloc au suivant. */
+@media (max-width: 767px) {
+  :root { --lud-section: 2rem; }
+}
+
+/* =====================================================================
+   3. SOCLE
+   ===================================================================== */
+body {
+  background-color: var(--lud-paper);
+  color: var(--bs-body-color);
+  font-family: var(--lud-font);
+  font-size: var(--lud-text-base);
+  line-height: 1.55;
+}
+
+/* motif végétal en filigrane, comme sur les maquettes */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .5;
+  background-image:
+    radial-gradient(520px 520px at -8% 12%, rgba(0, 122, 112, .05), transparent 70%),
+    radial-gradient(560px 560px at 108% 30%, rgba(255, 191, 24, .06), transparent 70%),
+    radial-gradient(480px 480px at -6% 88%, rgba(255, 191, 24, .05), transparent 70%),
+    radial-gradient(520px 520px at 106% 96%, rgba(0, 122, 112, .05), transparent 70%);
+}
+/* =====================================================================
+   ORDRE D'EMPILEMENT
+   ---------------------------------------------------------------------
+   Une seule règle : #header est le seul contexte d'empilement de la page.
+   Tout ce qui doit flotter au-dessus du contenu vit dedans, ou reçoit un
+   z-index positif sans que son parent en crée un.
+
+     0    motif de fond du corps
+     auto contenu de la page (#wrapper, #footer)
+     1030 voile des tiroirs
+     1050 #header - et donc, à l'intérieur :
+            10  panneau de sous-rayons de la navigation
+            40  suggestions de la recherche
+          1045  tiroir « Toutes les catégories » (valeur Bootstrap)
+     1060 tiroir de filtres (dans #wrapper, sous 1200 px seulement)
+     1140 voile des boîtes de dialogue
+     1150 boîtes de dialogue
+     1200 messages temporaires
+
+   L'en-tête est haut dans l'échelle parce que le tiroir des catégories vit à
+   l'intérieur : le voile, lui, est posé sur <body> par Bootstrap, et à sa
+   valeur d'origine il recouvrait tout l'en-tête, tiroir compris. Le voile
+   passe donc sous l'en-tête : la page s'assombrit, l'en-tête reste net.
+
+   Trois pièges rencontrés, à ne pas réintroduire :
+   - donner un z-index à #wrapper : il devient un contexte, et le tiroir de
+     filtres ne peut plus passer devant l'en-tête ;
+   - donner un z-index aux rangées de l'en-tête (.ludik-head, .ludik-nav) :
+     chacune devient un contexte, et le tiroir des rayons se
+     retrouve coincé sous les rangées du dessus. Elles ne se recouvrent pas :
+     elles n'ont pas besoin de z-index ;
+   - mettre un débordement (overflow) sur un conteneur dont un descendant est
+     en position absolue : il est rogné, ce qui ressemble à un problème
+     d'empilement sans en être un.
+   ===================================================================== */
+#wrapper, #footer, .footer { position: relative; }
+#header { position: relative; z-index: 1050; }
+.offcanvas-backdrop { z-index: 1030; }
+/* Le tiroir de filtres vit dans la page : il doit passer devant l'en-tête -
+   mais seulement quand il est un tiroir. Au-delà de 1200 px la colonne garde
+   la classe offcanvas-xl tout en étant une colonne ordinaire : lui laisser ce
+   z-index la faisait passer par-dessus l'en-tête et ses tiroirs. */
+@media (max-width: 1199px) {
+  #left-column.offcanvas, #left-column.offcanvas-xl { z-index: 1060; }
+}
+.modal-backdrop { z-index: 1140; }
+.modal { z-index: 1150; }
+
+h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--lud-ink);
+  line-height: 1.18;
+}
+h1, .h1 { font-size: clamp(1.75rem, 3.4vw, var(--lud-title-lg)); font-weight: 800; }
+h2, .h2 { font-size: clamp(1.75rem, 2.8vw, var(--lud-title-md)); font-weight: 700; }
+h3, .h3 { font-size: var(--lud-title-sm); font-weight: 700; }
+h4, .h4 { font-size: var(--lud-text-md); font-weight: 700; }
+a { text-decoration: none; }
+a:hover { text-decoration: none; }
+:focus-visible {
+  outline: 2px solid var(--lud-gold-500);
+  outline-offset: 2px;
+  border-radius: var(--lud-r-sm);
+}
+::selection { background: var(--lud-gold-200); color: var(--lud-ink); }
+img { max-width: 100%; }
+
+.container, .container-md, .container-fluid {
+  max-width: var(--lud-page);
+  margin-inline: auto;
+  padding-inline: var(--lud-gutter);
+}
+/* le thème parent restreint certaines pages avec .container--limited-* (connexion,
+   inscription, mot de passe oublié, page introuvable). Sans ce rappel, la largeur
+   de page ci-dessus l'emporte et les formulaires s'étirent sur toute la page. */
+.container--limited-sm { max-width: 34rem; }
+.container--limited-md { max-width: 45rem; }
+.container--limited-lg { max-width: 60rem; }
+/* les gouttières viennent de --lud-gutter : pas de palier supplémentaire */
+
+#wrapper { padding-block: var(--lud-s5) var(--lud-s10); }
+#index #wrapper { padding-top: var(--lud-s4); }
+
+/* =====================================================================
+   4. PRIMITIVES
+   ===================================================================== */
+
+/* --- 4.1 Icônes (jeu Lucide, sprite inséré dans la page) --- */
+svg.ludik-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.lud-i {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  vertical-align: -.2em;
+  stroke-width: 1.75;
+}
+.lud-i--sm { width: 1rem; height: 1rem; }
+.lud-i--lg { width: 1.5rem; height: 1.5rem; }
+.lud-i--xl { width: 1.75rem; height: 1.75rem; stroke-width: 1.6; }
+.lud-i--2xl { width: 2rem; height: 2rem; stroke-width: 1.5; }
+
+/* --- 4.2 Surfaces --- */
+.lud-card {
+  background: var(--lud-surface);
+  border: none;
+  border-radius: var(--lud-r-lg);
+  box-shadow: var(--lud-shadow-sm);
+}
+.lud-card--pad { padding: clamp(var(--lud-s4), 2.2vw, var(--lud-s6)); }
+.lud-card--flat { box-shadow: none; }
+.lud-card--soft { background: var(--lud-surface-alt); box-shadow: none; }
+
+/* --- 4.3 Boutons --- */
+.btn {
+  border-radius: var(--lud-r-md);
+  font-family: var(--lud-font-title);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lud-s2);
+}
+.btn-primary {
+  --bs-btn-bg: var(--lud-gold-500);
+  --bs-btn-border-color: var(--lud-gold-500);
+  --bs-btn-color: var(--lud-green-900);
+  --bs-btn-hover-bg: var(--lud-gold-600);
+  --bs-btn-hover-border-color: var(--lud-gold-600);
+  --bs-btn-hover-color: var(--lud-green-900);
+  --bs-btn-active-bg: var(--lud-gold-600);
+  --bs-btn-active-border-color: var(--lud-gold-600);
+  --bs-btn-active-color: var(--lud-green-900);
+  --bs-btn-disabled-bg: var(--lud-gold-200);
+  --bs-btn-disabled-border-color: var(--lud-gold-200);
+  --bs-btn-disabled-color: var(--lud-ink-mute);
+  font-weight: 700;
+}
+.btn-secondary {
+  --bs-btn-bg: var(--lud-green-600);
+  --bs-btn-border-color: var(--lud-green-600);
+  --bs-btn-color: #fff;
+  --bs-btn-hover-bg: var(--lud-green-700);
+  --bs-btn-hover-border-color: var(--lud-green-700);
+  --bs-btn-hover-color: #fff;
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--lud-green-600);
+  --bs-btn-border-color: var(--lud-line-strong);
+  --bs-btn-bg: var(--lud-surface);
+  --bs-btn-hover-bg: var(--lud-green-50);
+  --bs-btn-hover-border-color: var(--lud-green-300);
+  --bs-btn-hover-color: var(--lud-green-700);
+}
+.btn-light {
+  --bs-btn-bg: #fff;
+  --bs-btn-border-color: #fff;
+  --bs-btn-color: var(--lud-green-900);
+  --bs-btn-hover-bg: var(--lud-gold-100);
+  --bs-btn-hover-border-color: var(--lud-gold-100);
+  font-weight: 700;
+}
+/* --- Famille de boutons du thème ---
+   .lud-btn est la base ; le rôle vient du modificateur. Le jaune porte
+   l'action principale, le blanc bordé de vert l'action secondaire. Les
+   boutons du thème parent (.btn-*) sont alignés au-dessus pour que le
+   rendu reste le même quand PrestaShop produit son propre balisage. */
+.lud-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lud-s2);
+  min-height: 2.75rem;
+  padding: .65rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--lud-r-md);
+  background: var(--lud-gold-500);
+  color: var(--lud-green-900);
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  font-size: var(--lud-text-md);
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--lud-ease), border-color var(--lud-ease),
+              color var(--lud-ease), transform var(--lud-ease), box-shadow var(--lud-ease);
+}
+.lud-btn:hover {
+  background: var(--lud-gold-600);
+  color: var(--lud-green-900);
+  transform: translateY(-1px);
+  box-shadow: var(--lud-shadow-md);
+}
+.lud-btn:disabled, .lud-btn.is-disabled {
+  background: var(--lud-gold-200);
+  color: var(--lud-ink-mute);
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.lud-btn--ghost {
+  background: var(--lud-surface);
+  border-color: var(--lud-green-200);
+  color: var(--lud-green-700);
+}
+.lud-btn--ghost:hover {
+  background: var(--lud-green-50);
+  border-color: var(--lud-green-200);
+  color: var(--lud-green-800);
+}
+.lud-btn--dark { background: var(--lud-green-600); color: #fff; }
+.lud-btn--dark:hover { background: var(--lud-green-700); color: #fff; }
+.lud-btn--sm { min-height: 2.25rem; padding: .4rem .85rem; font-size: var(--lud-text-sm); }
+.lud-btn--lg { min-height: 3.25rem; padding: .9rem 1.75rem; font-size: var(--lud-text-lg); }
+.lud-btn--block { width: 100%; }
+/* bouton à icône seule : zone tactile suffisante sur mobile */
+.lud-btn--icon { width: 2.5rem; min-height: 2.5rem; padding: 0; }
+@media (max-width: 767px) { .lud-btn--icon { width: 2.75rem; min-height: 2.75rem; } }
+
+.lud-btn-ghost {
+  border: 1px solid rgba(255, 255, 255, .3);
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  border-radius: var(--lud-r-md);
+  padding: .6rem 1.1rem;
+  font-family: var(--lud-font-title);
+  font-weight: 600;
+}
+.lud-btn-ghost:hover { background: rgba(255, 255, 255, .16); color: #fff; }
+/* bouton carré, réservé à l'ajout au panier dans les grilles */
+.lud-btn-square {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--lud-r-md);
+  background: var(--lud-gold-500);
+  color: var(--lud-green-900);
+  cursor: pointer;
+  transition: background-color var(--lud-ease), transform var(--lud-ease), box-shadow var(--lud-ease);
+}
+.lud-btn-square:hover { background: var(--lud-gold-600); transform: translateY(-1px); box-shadow: var(--lud-shadow-md); }
+.lud-btn-square--ghost {
+  background: var(--lud-surface);
+  border: 1px solid var(--lud-line);
+  color: var(--lud-green-600);
+}
+.lud-btn-square--ghost:hover { background: var(--lud-green-50); }
+
+/* --- Prix ---
+   Le franc pacifique se compose sans décimale, avec un séparateur de milliers :
+   « 34 000 F ». Le séparateur lui-même est corrigé côté serveur, par le hook
+   actionOutputHTMLBefore du module ludikhome : le CLDR français emploie une
+   espace fine de deux pixels, illisible à cette taille. Ici, seul l'alignement
+   des chiffres est traité. */
+.product-miniature__price,
+.product__price,
+.product__regular-price,
+.cart-summary-line .value,
+.product-line-grid .product-price,
+.product-price,
+.total-value,
+.price {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Micro-interactions ---
+   Tout ce qui se soulève au survol se repose au clic : sans cet état, un
+   bouton reste immobile sous le doigt et l'action paraît ne pas avoir été
+   prise. Rien d'autre : pas d'animation permanente, et le tout s'annule sous
+   prefers-reduced-motion via --lud-ease. */
+.lud-btn:active,
+.lud-btn-square:active,
+.ludik-nav__all:active,
+.ludik-head__action:active,
+.product-miniature__add:active,
+.product-miniature__favori .wishlist-button-add:active,
+.ludik-foot__social a:active {
+  transform: translateY(1px);
+  box-shadow: var(--lud-shadow-sm);
+}
+.ludik-hero__fleche:active { transform: scale(.96); }
+.lud-carrousel__fleche:active { transform: translateY(-50%) scale(.96); }
+.ludik-univers a:active { transform: translateY(-1px); }
+.product-miniature:active .product-miniature__inner { transform: translateY(-1px); }
+
+/* --- 4.4 Badges et pastilles --- */
+.lud-badge {
+  display: inline-block;
+  font-size: var(--lud-text-xs);
+  font-weight: 700;
+  letter-spacing: .04em;
+  padding: .18rem .55rem;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-green-900);
+  color: #fff;
+}
+.lud-badge--new { background: var(--lud-promo); }
+.lud-badge--promo { background: var(--lud-promo); }
+.lud-badge--out { background: var(--lud-alert-bg); color: var(--lud-alert); }
+/* étiquette de rayon sur la fiche produit */
+.lud-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: var(--lud-text-xs);
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--lud-ink-soft);
+  background: var(--lud-surface-alt);
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-sm);
+  padding: .25rem .6rem .25rem .5rem;
+}
+.lud-tag::before {
+  content: "";
+  width: 3px;
+  height: .85em;
+  border-radius: 3px;
+  background: var(--lud-gold-500);
+}
+/* état de stock */
+.lud-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+  color: var(--lud-ink-soft);
+}
+.lud-stock::before {
+  content: "";
+  flex: 0 0 auto;
+  width: .5rem;
+  height: .5rem;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-stock);
+}
+.lud-stock--out { color: var(--lud-warn); }
+.lud-stock--out::before { background: var(--lud-warn); }
+
+/* --- 4.5 Titres de bloc (barre or verticale) --- */
+.lud-title {
+  position: relative;
+  padding-left: .85rem;
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-title-sm);
+  font-weight: 700;
+  color: var(--lud-ink);
+  margin-bottom: var(--lud-s4);
+}
+.lud-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .18em;
+  bottom: .18em;
+  width: 4px;
+  border-radius: 4px;
+  background: var(--lud-gold-500);
+}
+.lud-title .lud-i { color: var(--lud-green-600); margin-right: .4rem; }
+
+/* en-tête de section avec lien à droite */
+.lud-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--lud-s6);
+  margin-bottom: var(--lud-s5);
+}
+.lud-section-head h2 { font-size: clamp(1.35rem, 2.3vw, var(--lud-title-md)); margin: 0; }
+.lud-section-head p { margin: .3rem 0 0; font-size: var(--lud-text-sm); color: var(--lud-ink-soft); }
+.lud-section-head > a {
+  flex: 0 0 auto;
+  font-weight: 600;
+  font-size: var(--lud-text-base);
+  color: var(--lud-green-600);
+}
+.lud-section-head > a:hover { color: var(--lud-gold-600); }
+
+/* --- 4.6 Champs --- */
+.form-control, .form-select {
+  border: 1px solid var(--lud-line-strong);
+  border-radius: var(--lud-r-sm);
+  font-size: var(--lud-text-base);
+  padding: .55rem .8rem;
+  background: var(--lud-surface);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--lud-green-400);
+  box-shadow: 0 0 0 3px rgba(29, 128, 121, .14);
+}
+
+/* Bouton « afficher le mot de passe ».
+   Le thème parent le pose dans un .input-group de Bootstrap, qui soude le
+   bouton au champ par une marge négative d'un pixel : avec nos rayons, les
+   deux formes arrondies se touchaient. Il est aussi rendu en bouton principal,
+   donc en jaune, alors que révéler un mot de passe n'est pas l'action
+   importante de la page : le jaune reste à la validation. */
+.password-field { gap: var(--lud-s2); }
+.password-field > .btn {
+  flex: 0 0 auto;
+  margin: 0;
+  width: 3rem;
+  border-radius: var(--lud-r-sm);
+  --bs-btn-bg: var(--lud-surface);
+  --bs-btn-border-color: var(--lud-line-strong);
+  --bs-btn-color: var(--lud-ink-soft);
+  --bs-btn-hover-bg: var(--lud-green-50);
+  --bs-btn-hover-border-color: var(--lud-green-400);
+  --bs-btn-hover-color: var(--lud-green-700);
+  --bs-btn-active-bg: var(--lud-green-50);
+  --bs-btn-active-border-color: var(--lud-green-400);
+  --bs-btn-active-color: var(--lud-green-700);
+}
+
+/* =====================================================================
+   5. COMPOSANTS
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   5.1 En-tête - rangée d'identité sur fond clair
+   ---------------------------------------------------------------------
+   L'en-tête des maquettes est clair : le blanc cassé laisse le logo et les
+   couvertures produits porter la couleur. Le vert profond est réservé au
+   hero, aux campagnes et au pied de page.
+   --------------------------------------------------------------------- */
+#header { background: transparent; border: none; box-shadow: none; }
+
+.ludik-head {
+  position: relative;
+  color: var(--lud-ink);
+  /* Frondaisons en filigrane aux deux extrémités, dessinées en fond et non par
+     des pseudo-éléments débordants : il fallait alors couper le débordement de
+     l'en-tête, ce qui rognait aussi le panneau de suggestions. */
+  background-color: var(--lud-surface);
+  background-image:
+    radial-gradient(24rem 18rem at -2% 20%,  rgba(0, 122, 112, .13), transparent 70%),
+    radial-gradient(16rem 14rem at 12% 90%,  rgba(255, 191, 24, .12), transparent 70%),
+    radial-gradient(24rem 18rem at 102% 30%, rgba(0, 122, 112, .11), transparent 70%),
+    radial-gradient(16rem 14rem at 90% 95%,  rgba(255, 191, 24, .1),  transparent 70%);
+  background-repeat: no-repeat;
+}
+.ludik-head__row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--lud-s6);
+  padding-block: var(--lud-s4);
+  min-height: var(--lud-head-h);
+}
+
+/* identité */
+.ludik-head__brand { display: flex; align-items: center; gap: var(--lud-s4); flex: 1 1 0; min-width: 0; }
+.ludik-head__h1 { line-height: 0; margin: 0; }
+.ludik-head__logo { display: block; line-height: 0; }
+.ludik-head__logo img { height: 84px; width: auto; }
+/* recherche : au centre, bloc unique champ + bouton */
+.ludik-head__search { flex: 0 1 40rem; min-width: 0; display: flex; justify-content: center; }
+.ludik-head__search .ludik-search-wrap { display: flex; width: 100%; max-width: 40rem; margin: 0 !important; }
+.ludik-head__search .ps-searchbar { width: 100%; }
+.ludik-head__search .ps-searchbar__form {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 1px solid var(--lud-line-strong);
+  border-radius: var(--lud-r-md);
+  overflow: hidden;
+  background: var(--lud-surface);
+  transition: border-color var(--lud-ease), box-shadow var(--lud-ease);
+}
+/* la mise au point clavier ceinture le bloc entier, pas le seul champ */
+.ludik-head__search .ps-searchbar__form:focus-within {
+  border-color: var(--lud-green-400);
+  box-shadow: 0 0 0 3px rgba(0, 122, 112, .16);
+}
+.ludik-head__search input[type="text"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* le champ et son bouton forment un seul bloc : ni bordure, ni rayon, ni ombre
+     propres à l'un ou à l'autre, c'est le formulaire qui porte la forme */
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+  background: transparent;
+  padding: .8rem 1.25rem;
+  font-size: var(--lud-text-md);
+  line-height: 1.5;
+  color: var(--lud-ink);
+  height: 2.875rem;
+}
+.ludik-head__search input[type="text"]::placeholder { color: var(--lud-ink-mute); }
+.ludik-head__search input[type="text"]:focus { outline: none; box-shadow: none; }
+.ps-searchbar__magnifier, .ps-searchbar__clear { display: none !important; }
+.ps-searchbar__go {
+  flex: 0 0 auto;
+  width: 3.5rem;
+  height: 2.875rem;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: var(--lud-green-600);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--lud-ease);
+}
+.ps-searchbar__go:hover { background: var(--lud-green-700); }
+.ps-searchbar__go .lud-i { width: 1.35rem; height: 1.35rem; stroke-width: 2.1; }
+/* Suggestions de recherche.
+   Le z-index va sur le tiroir, qui est l'élément positionné du thème parent ;
+   le poser sur la liste la sortait du flux et faisait s'effondrer le tiroir
+   à deux pixels de haut. */
+.ps-searchbar__dropdown, .js-search-dropdown {
+  z-index: 40;
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-md);
+  background: var(--lud-surface);
+  box-shadow: var(--lud-shadow-lg);
+  padding: var(--lud-s2);
+}
+/* La liste est plafonnée à cinq suggestions par custom.js : elle tient dans
+   le panneau, le thème parent la faisait défiler sur vingt-et-un rem et
+   rognait les dernières lignes. */
+.ps-searchbar__results, .js-search-results {
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  display: grid;
+  gap: .125rem;
+}
+/* Le renvoi vers la page de résultats, sous la liste. */
+.ps-searchbar__more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lud-s3);
+  margin-top: var(--lud-s2);
+  padding: .55rem .6rem;
+  border-top: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-sm);
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+  color: var(--lud-green-700);
+  transition: background-color var(--lud-ease), color var(--lud-ease);
+}
+.ps-searchbar__more:hover { background: var(--lud-green-50); color: var(--lud-green-800); }
+.ps-searchbar__more[hidden] { display: none; }
+.ps-searchbar__result-link {
+  display: flex;
+  align-items: center;
+  gap: var(--lud-s3);
+  padding: .5rem .6rem;
+  border-radius: var(--lud-r-sm);
+  font-size: var(--lud-text-sm);
+  line-height: 1.35;
+  color: var(--lud-ink);
+  transition: background-color var(--lud-ease);
+}
+.ps-searchbar__result-link:hover,
+.ps-searchbar__result-link[aria-selected="true"] { background: var(--lud-green-50); }
+.ps-searchbar__result-link img {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-sm);
+  background: var(--lud-surface);
+}
+
+/* compte et panier : icône cerclée, libellé sur deux lignes */
+.ludik-head__actions { flex: 1 1 0; display: flex; align-items: center; justify-content: flex-end; gap: var(--lud-s3); }
+/* boutons compacts bordés : le compte et le panier se lisent comme deux
+   actions, pas comme deux liens perdus au bout de la rangée */
+.ludik-head__action, .ludik-head__actions .header-block__action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .45rem .9rem .45rem .55rem;
+  border: none;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-surface);
+  box-shadow: var(--lud-shadow-sm);
+  color: var(--lud-ink) !important;
+  transition: background-color var(--lud-ease), box-shadow var(--lud-ease), color var(--lud-ease);
+}
+.ludik-head__action:hover, .ludik-head__actions .header-block__action-btn:hover {
+  background: var(--lud-green-50);
+  box-shadow: var(--lud-shadow-md);
+}
+.ludik-head__action > .lud-i,
+.ludik-head__cart-icon {
+  position: relative;
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: .4rem;
+  border: none;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-green-50);
+  color: var(--lud-green-700);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  transition: border-color var(--lud-ease), background-color var(--lud-ease);
+}
+.ludik-head__cart-icon .lud-i { width: 1.2rem; height: 1.2rem; padding: 0; border: none; background: none; }
+.ludik-head__action-text { display: flex; flex-direction: column; line-height: 1.25; }
+.ludik-head__action-text strong,
+.ludik-head__action-text .header-block__title {
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  font-size: var(--lud-text-base);
+  color: var(--lud-ink);
+}
+.ludik-head__action-text em {
+  font-style: normal;
+  font-size: var(--lud-text-xs);
+  color: var(--lud-ink-mute);
+}
+.ludik-head__action:hover .ludik-head__action-text strong,
+.ludik-head__action:hover .header-block__title { color: var(--lud-green-600); }
+.ludik-head__action:hover > .lud-i,
+.ludik-head__action:hover .ludik-head__cart-icon { background: var(--lud-green-100); }
+.header-block__badge, .cart-products-count {
+  position: absolute;
+  top: -.3rem;
+  right: -.35rem;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding-inline: .24rem;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-gold-500);
+  color: var(--lud-green-900);
+  font-size: var(--lud-text-xs);
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.ludik-head__actions .dropdown-menu {
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-md);
+  box-shadow: var(--lud-shadow-lg);
+  padding: var(--lud-s2);
+}
+.ludik-head__actions .dropdown-item { border-radius: var(--lud-r-sm); font-size: var(--lud-text-base); }
+.ludik-head__actions .dropdown-item + .dropdown-item { margin-top: .125rem; }
+.ludik-head__actions .dropdown-item:hover { background: var(--lud-green-50); color: var(--lud-green-700); }
+.ludik-head__mobile { display: flex; gap: var(--lud-s3); }
+@media (min-width: 768px) { .ludik-head__mobile { display: none; } }
+
+/* Tablette et petit portable : les trois blocs ne tiennent pas sur une ligne,
+   la recherche passait sous le libellé « Connexion ». L'identité et les
+   actions gardent la première ligne, la recherche prend la seconde. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .ludik-head__row { flex-wrap: wrap; gap: var(--lud-s3) var(--lud-s5); }
+  .ludik-head__brand { order: 1; flex: 1 1 auto; }
+  .ludik-head__actions { order: 2; flex: 0 0 auto; gap: var(--lud-s4); }
+  .ludik-head__search { order: 3; flex: 1 1 100%; justify-content: stretch; }
+  .ludik-head__search .ludik-search-wrap { max-width: none; }
+  .ludik-head__action-text { display: none; }
+  .ludik-head__logo img { height: 62px; }
+}
+
+@media (max-width: 767px) {
+  .ludik-head__row { flex-wrap: wrap; gap: var(--lud-s3) var(--lud-s4); min-height: 0; }
+  .ludik-head__brand { flex: 1 1 auto; }
+  .ludik-head__logo img { height: 52px; }
+  .ludik-head__search { order: 3; flex: 1 1 100%; }
+  .ludik-head__actions { display: none; }
+}
+
+/* ---------------------------------------------------------------------
+   5.2 Navigation des rayons - barre claire, onglets en pastilles
+   ---------------------------------------------------------------------
+   Le rayon consulté était signalé par un aplat jaune et un trait de trois
+   pixels sur toute la largeur de l'onglet : lourd et daté. L'onglet est
+   maintenant une pastille, avec un repère fin et court sous celle du rayon
+   consulté.
+   --------------------------------------------------------------------- */
+.ludik-nav {
+  /* position relative sans z-index : le panneau de sous-rayons a besoin d'un
+     repère de positionnement, pas d'un contexte d'empilement */
+  position: relative;
+  background: var(--lud-surface);
+  box-shadow: 0 1px 0 rgba(10, 55, 52, .06);
+}
+.ludik-nav .ps-mainmenu { padding: 0; }
+.ludik-nav .ps-mainmenu--desktop {
+  border: none;
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* La colonne du module est en flex : sans cela son <nav> se réduit à la
+   largeur de son contenu, la barre ne va pas jusqu'à la gouttière droite et
+   les rayons se tassent à gauche. */
+.ludik-nav .ps-mainmenu__desktop { flex: 1 1 auto; min-width: 0; }
+.ludik-nav__inner { width: 100%; }
+.ludik-nav .ps-mainmenu__tree {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  gap: .1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* La liste occupe toute la largeur restante et répartit ses rayons dedans :
+     le dernier arrive donc à la gouttière droite, comme le bouton « Toutes
+     les catégories » tient la gouttière gauche. Sans cela, les rayons se
+     tassaient à gauche et laissaient un vide à droite. */
+  flex: 1 1 auto;
+  justify-content: space-between;
+  /* La liste cède la place au bouton « Toutes les catégories ». Surtout : pas
+     d'overflow ici. Un conteneur à débordement rogne ses descendants en
+     position absolue, et le panneau de sous-rayons disparaissait - ce qui
+     ressemblait à un problème d'ordre d'empilement. La largeur est tenue par
+     les libellés courts et par le retrait des icônes sur écran moyen. */
+  min-width: 0;
+}
+.ludik-nav .ps-mainmenu__tree-item { position: relative; display: flex; }
+.ludik-nav .ps-mainmenu__tree-item-wrapper { display: flex; align-items: center; padding-block: .5rem; }
+.ludik-nav .ps-mainmenu__tree-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .5rem .5rem;
+  border-radius: var(--lud-r-pill);
+  font-family: var(--lud-font-title);
+  font-weight: 600;
+  font-size: var(--lud-text-sm);
+  color: var(--lud-green-800);
+  white-space: nowrap;
+  transition: color var(--lud-ease), background-color var(--lud-ease);
+}
+.ludik-nav .ps-mainmenu__tree-link .lud-i {
+  width: 1.0625rem;
+  height: 1.0625rem;
+  color: var(--t-accent, var(--lud-green-600));
+  transition: color var(--lud-ease);
+}
+.ludik-nav .ps-mainmenu__tree-item:hover .ps-mainmenu__tree-link,
+.ludik-nav .ps-mainmenu__tree-item:focus-within .ps-mainmenu__tree-link {
+  background: var(--lud-surface-alt);
+  color: var(--lud-green-800);
+}
+.ludik-nav .ps-mainmenu__tree-item.current .ps-mainmenu__tree-link {
+  color: var(--lud-green-800);
+  font-weight: 700;
+}
+
+/* teinte du pictogramme, la même que sur les cartes de rayon */
+.ludik-nav .ps-mainmenu__tree-item.t-societe { --t-accent: var(--lud-uni-societe); }
+.ludik-nav .ps-mainmenu__tree-item.t-tcg     { --t-accent: var(--lud-uni-tcg); }
+.ludik-nav .ps-mainmenu__tree-item.t-manga   { --t-accent: var(--lud-uni-manga); }
+.ludik-nav .ps-mainmenu__tree-item.t-jdr     { --t-accent: var(--lud-uni-jdr); }
+.ludik-nav .ps-mainmenu__tree-item.t-bd      { --t-accent: var(--lud-uni-bd); }
+.ludik-nav .ps-mainmenu__tree-item.t-creatif { --t-accent: var(--lud-uni-creatif); }
+
+/* repère du rayon consulté : une barre courte et arrondie, qui s'étire depuis
+   le centre à l'ouverture du panneau */
+.ludik-nav .ps-mainmenu__tree-item::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 1.75rem;
+  height: 3px;
+  margin-left: -.875rem;
+  border-radius: 3px 3px 0 0;
+  background: var(--t-accent, var(--lud-gold-500));
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform var(--lud-ease);
+}
+.ludik-nav .ps-mainmenu__tree-item:hover::after,
+.ludik-nav .ps-mainmenu__tree-item:focus-within::after,
+.ludik-nav .ps-mainmenu__tree-item.current::after { transform: scaleX(1); }
+.ludik-nav .ps-mainmenu__tree-dropdown-toggle { display: none; }
+@media (max-width: 1420px) {
+  .ludik-nav .ps-mainmenu__tree-link { padding-inline: .4rem; gap: .28rem; }
+  .ludik-nav .ps-mainmenu__tree-item::after { left: .4rem; right: .4rem; }
+  .ludik-nav__all-chevron { display: none; }
+}
+/* sous 1340 px, les pictogrammes cèdent la place aux libellés : la barre
+   desktop n'existe qu'à partir de 1200 px, tout doit y tenir sans défilement */
+@media (max-width: 1260px) {
+  .ludik-nav .ps-mainmenu__tree-link .lud-i { display: none; }
+  .ludik-nav__all { padding: .5rem .75rem; margin-right: var(--lud-s2); }
+  .ludik-nav__all-chevron { display: none; }
+}
+
+/* bouton « Tous les rayons » : l'entrée principale, plus dense que les onglets */
+.ludik-nav__all {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  border: none;
+  cursor: pointer;
+  flex: 0 0 auto;
+  margin-right: var(--lud-s4);
+  padding: .5rem .8rem;
+  border-radius: var(--lud-r-md);
+  background: var(--lud-green-700);
+  color: #fff;
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  font-size: var(--lud-text-sm);
+  white-space: nowrap;
+  align-self: center;
+  transition: background-color var(--lud-ease), transform var(--lud-ease);
+}
+.ludik-nav__all:hover { background: var(--lud-green-800); color: #fff; transform: translateY(-1px); }
+.ludik-nav__all .lud-i { color: var(--lud-green-200); }
+.ludik-nav__all-chevron { margin-left: .1rem; opacity: .75; }
+.ludik-nav__inner {
+  display: flex;
+  align-items: stretch;
+  max-width: var(--lud-page);
+  margin-inline: auto;
+  padding-inline: var(--lud-gutter);
+}
+
+/* --- Panneau de sous-rayons (un seul niveau, colonnes) --- */
+.ludik-submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  display: none;
+  min-width: 34rem;
+  max-width: min(64rem, calc(100vw - 2rem));
+  background: var(--lud-surface);
+  border: 1px solid var(--lud-line);
+  border-top: none;
+  border-radius: 0 0 var(--lud-r-lg) var(--lud-r-lg);
+  box-shadow: var(--lud-shadow-lg);
+  padding: var(--lud-s5) var(--lud-s5) var(--lud-s4);
+}
+.ps-mainmenu__tree-item:hover .ludik-submenu,
+.ps-mainmenu__tree-item:focus-within .ludik-submenu { display: block; }
+/* les derniers rayons ouvrent leur panneau vers la gauche */
+.ps-mainmenu__tree-item:nth-last-child(-n+2) .ludik-submenu { left: auto; right: 0; }
+
+.ludik-submenu__list {
+  columns: 3;
+  column-gap: var(--lud-s6);
+  list-style: none;
+  margin: 0 0 var(--lud-s4);
+  padding: 0;
+}
+.ludik-submenu__list li + li { margin-top: .125rem; }
+@media (max-width: 1439px) { .ludik-submenu__list { columns: 2; } }
+.ludik-submenu__list li { break-inside: avoid; }
+.ludik-submenu__link {
+  display: block;
+  padding: .32rem .5rem;
+  border-radius: var(--lud-r-sm);
+  font-size: var(--lud-text-sm);
+  line-height: 1.4;
+  color: var(--lud-ink-soft);
+}
+.ludik-submenu__link:hover { background: var(--lud-green-50); color: var(--lud-green-600); }
+.ludik-submenu__all {
+  display: flex;
+  align-items: baseline;
+  gap: var(--lud-s2);
+  padding-top: var(--lud-s3);
+  border-top: 1px solid var(--lud-line);
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  font-size: var(--lud-text-sm);
+  color: var(--lud-green-600);
+}
+.ludik-submenu__all:hover { color: var(--lud-gold-600); }
+.ludik-submenu__count { font-weight: 400; font-size: var(--lud-text-xs); color: var(--lud-ink-mute); }
+
+/* --- Menu mobile --- */
+.ps-mainmenu--tiroir { --bs-offcanvas-width: 24rem; }
+.ludik-menu-mobile__titre {
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  font-size: var(--lud-text-lg);
+  color: var(--lud-ink);
+}
+.ludik-menu-mobile { list-style: none; margin: 0; padding: 0; }
+.ludik-menu-mobile__rayon + .ludik-menu-mobile__rayon {
+  margin-top: var(--lud-s4);
+  padding-top: var(--lud-s4);
+  border-top: 1px solid var(--lud-line);
+}
+.ludik-menu-mobile__lien {
+  display: flex;
+  align-items: center;
+  gap: var(--lud-s2);
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  font-size: var(--lud-text-md);
+  color: var(--lud-ink);
+  margin-bottom: var(--lud-s2);
+}
+.ludik-menu-mobile__lien .lud-i { color: var(--lud-green-500); }
+.ludik-menu-mobile__sous { list-style: none; margin: 0; padding-left: 1.75rem; display: grid; gap: .125rem; }
+.ludik-menu-mobile__sous a {
+  display: block;
+  padding: .3rem .5rem;
+  border-radius: var(--lud-r-sm);
+  font-size: var(--lud-text-sm);
+  color: var(--lud-ink-soft);
+}
+.ludik-menu-mobile__sous a:hover { background: var(--lud-green-50); color: var(--lud-green-700); }
+.ludik-menu-mobile__tout { font-weight: 600; color: var(--lud-green-600) !important; }
+.ludik-nav .ps-mainmenu__mobile-toggle .menu-toggle { color: var(--lud-green-800); }
+
+/* ---------------------------------------------------------------------
+   5.3 Fil d'Ariane
+   --------------------------------------------------------------------- */
+.breadcrumb__wrapper { background: transparent; padding-block: 0 var(--lud-s4); }
+.breadcrumb__wrapper .container, .breadcrumb__wrapper .container-md { max-width: var(--lud-page); }
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .1rem .3rem;
+  margin: 0;
+  min-height: 2.5rem;
+  padding: .55rem 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: var(--lud-text-sm);
+  color: var(--lud-ink-mute);
+}
+.breadcrumb-item:last-child { font-weight: 600; color: var(--lud-ink); }
+.breadcrumb a { color: var(--lud-ink-soft); }
+.breadcrumb a:hover { color: var(--lud-green-600); }
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: var(--lud-ink-mute);
+  padding-inline: .4rem;
+  font-size: 1.05em;
+  line-height: 1;
+}
+.breadcrumb-item:last-child, .breadcrumb-item:last-child a {
+  color: var(--lud-ink);
+  font-weight: 600;
+}
+.breadcrumb .lud-i, .breadcrumb .material-icons { color: var(--lud-green-500); }
+
+/* ---------------------------------------------------------------------
+   5.4 Hero - campagnes visuelles de l'accueil
+   ---------------------------------------------------------------------
+   Le visuel ne porte aucun texte : le titre, l'accroche et le bouton sont
+   produits par le gabarit à partir des champs de la diapositive, donc
+   administrables depuis le back-office. Le dégradé n'est là que pour
+   garantir la lisibilité du texte sur l'image.
+   --------------------------------------------------------------------- */
+.ludik-hero {
+  max-width: var(--lud-page);
+  margin-inline: auto;
+  /* pas de marge basse : l'espacement des blocs d'accueil vient du gap de
+     .page-content--home, et les deux s'ajoutaient */
+  padding-inline: var(--lud-gutter);
+}
+.ludik-hero__carousel {
+  position: relative;
+  border-radius: var(--lud-r-xl);
+  overflow: hidden;
+  box-shadow: var(--lud-shadow-md);
+  background: var(--lud-green-900);
+}
+.ludik-hero__item { position: relative; }
+.ludik-hero__link { display: block; color: inherit; }
+.ludik-hero__image {
+  display: block;
+  width: 100%;
+  /* 460 à 520 px sur desktop, bande de repères comprise : le hero porte
+     l'essentiel de l'impression visuelle de la page */
+  height: clamp(28.75rem, 36vw, 32.5rem);
+  object-fit: cover;
+  /* les visuels sont volontairement fondus dans le fond de la bannière :
+     un léger gain de contraste les rend perceptibles sous le dégradé */
+  filter: contrast(1.12) saturate(1.08);
+}
+/* voile de lisibilité : plus dense à gauche, où se trouve le texte */
+.ludik-hero__item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* le dégradé garantit la lisibilité du texte à gauche et laisse le visuel
+     respirer à droite */
+  background: linear-gradient(90deg,
+    rgba(3, 51, 48, .94) 0%,
+    rgba(3, 51, 48, .76) 32%,
+    rgba(3, 51, 48, .18) 62%,
+    rgba(3, 51, 48, 0) 100%);
+}
+.ludik-hero__contenu {
+  position: absolute;
+  z-index: 2;
+  inset: 0 auto 0 0;
+  width: min(38rem, 62%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--lud-s4);
+  /* la bande de repères occupe le bas : le texte s'arrête au-dessus */
+  padding: var(--lud-s10) clamp(var(--lud-s6), 4vw, var(--lud-s16)) 6rem;
+}
+/* surtitre : le rayon de la campagne */
+.ludik-hero__kicker {
+  margin: 0;
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-sm);
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lud-gold-400);
+}
+.ludik-hero__titre {
+  margin: 0;
+  font-family: var(--lud-font-title);
+  font-size: clamp(2.25rem, 4vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.025em;
+  color: #fff;
+  text-wrap: balance;
+}
+.ludik-hero__accroche {
+  margin: 0;
+  max-width: 30rem;
+  font-size: var(--lud-text-lg);
+  line-height: 1.5;
+  color: var(--lud-green-100);
+}
+.ludik-hero__cta { pointer-events: none; }
+.ludik-hero__link:hover .ludik-hero__cta {
+  background: var(--lud-gold-600);
+  transform: translateY(-1px);
+  box-shadow: var(--lud-shadow-md);
+}
+
+/* accroche manuscrite, posée dans l'angle libre du visuel */
+.ludik-hero__script {
+  position: absolute;
+  z-index: 2;
+  top: var(--lud-s6);
+  right: clamp(var(--lud-s5), 3vw, var(--lud-s8));
+  margin: 0;
+  text-align: right;
+  font-family: var(--lud-font-script);
+  font-size: clamp(1.3rem, 2vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: #fff;
+  pointer-events: none;
+  text-shadow: 0 2px 12px rgba(3, 51, 48, .5);
+}
+@media (max-width: 991px) { .ludik-hero__script { display: none; } }
+
+/* bande de repères, au pied du visuel */
+.ludik-hero__reperes {
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: clamp(var(--lud-s4), 2vw, var(--lud-s8));
+  padding: var(--lud-s4) clamp(var(--lud-s6), 4vw, var(--lud-s12));
+  background: rgba(2, 40, 37, .55);
+  backdrop-filter: blur(2px);
+  border-top: 1px solid rgba(255, 255, 255, .12);
+}
+.ludik-hero__reperes span {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+  color: var(--lud-on-dark);
+  white-space: nowrap;
+}
+.ludik-hero__reperes .lud-i { color: var(--lud-green-200); }
+@media (max-width: 1199px) {
+  .ludik-hero__reperes span:nth-child(n+3) { display: none; }
+}
+@media (max-width: 767px) {
+  .ludik-hero__reperes { display: none; }
+}
+
+/* flèches rondes, réunies en bas à droite : sur les bords du visuel elles
+   passaient devant l'accroche, qui occupe toute la moitié gauche */
+.ludik-hero__fleche {
+  position: absolute;
+  bottom: 5rem;
+  z-index: 3;
+  width: 2.875rem;
+  height: 2.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--lud-r-pill);
+  background: rgba(255, 255, 255, .92);
+  color: var(--lud-green-800);
+  box-shadow: var(--lud-shadow-md);
+  cursor: pointer;
+  transition: background-color var(--lud-ease), transform var(--lud-ease);
+}
+.ludik-hero__fleche:hover { background: #fff; transform: scale(1.06); }
+.ludik-hero__fleche--prev { right: calc(var(--lud-s5) + 3.375rem); }
+.ludik-hero__fleche--next { right: var(--lud-s5); }
+
+/* pagination discrète */
+.ludik-hero__pagination {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 5.25rem;
+  margin: 0;
+  justify-content: center;
+  gap: .35rem;
+}
+.ludik-hero__pagination [data-bs-target] {
+  width: .5rem;
+  height: .5rem;
+  margin: 0;
+  border: none;
+  border-radius: var(--lud-r-pill);
+  background: rgba(255, 255, 255, .45);
+  opacity: 1;
+  transition: width var(--lud-ease), background-color var(--lud-ease);
+}
+.ludik-hero__pagination .active { width: 1.5rem; background: var(--lud-gold-500); }
+
+@media (max-width: 991px) {
+  .ludik-hero__image { height: 17rem; }
+  .ludik-hero__contenu { width: 100%; padding: var(--lud-s6); gap: var(--lud-s3); }
+  .ludik-hero__item::after {
+    background: linear-gradient(180deg, rgba(3, 51, 48, .45) 0%, rgba(3, 51, 48, .9) 100%);
+  }
+  .ludik-hero__fleche { width: 2.375rem; height: 2.375rem; bottom: var(--lud-s3); }
+  .ludik-hero__contenu { padding-bottom: var(--lud-s10); }
+  .ludik-hero__fleche--prev { right: calc(var(--lud-s3) + 2.875rem); }
+  .ludik-hero__fleche--next { right: var(--lud-s3); }
+  .ludik-hero__pagination { bottom: var(--lud-s3); }
+}
+@media (max-width: 767px) {
+  /* les flèches tombaient sur le bouton d'appel : sur un écran tactile,
+     le glissement et les pastilles suffisent à changer de campagne */
+  .ludik-hero__fleche { display: none; }
+  .ludik-hero__contenu { padding: var(--lud-s5) var(--lud-s5) var(--lud-s10); }
+  .ludik-hero__cta { min-height: 2.75rem; padding: .65rem 1.25rem; font-size: var(--lud-text-md); }
+  .ludik-hero__pagination { left: var(--lud-s5); bottom: var(--lud-s4); }
+}
+@media (max-width: 575px) {
+  .ludik-hero { padding-inline: var(--lud-s4); }
+  .ludik-hero__image { height: 15rem; }
+  .ludik-hero__titre { font-size: 1.65rem; }
+  .ludik-hero__accroche { font-size: var(--lud-text-base); }
+}
+
+/* ---------------------------------------------------------------------
+   5.5 Raccourcis de rayon - grandes cases sous la navigation
+   ---------------------------------------------------------------------
+   Six cases larges, icône colorée par univers. La rangée de quatorze cases
+   minuscules d'avant ressemblait à un tableau de bord ; ici chaque case a
+   la place d'une vraie icône et d'un libellé lisible.
+   --------------------------------------------------------------------- */
+.ludik-tiles {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--lud-s3);
+  /* la rangée est posée sous la navigation : elle a besoin d'air des deux côtés */
+  margin-block: var(--lud-s6);
+}
+.ludik-tile {
+  --t-accent: var(--lud-green-600);
+  --t-fond: var(--lud-green-50);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lud-s2);
+  padding: var(--lud-s4) var(--lud-s3);
+  min-height: 7rem;
+  background: var(--lud-surface);
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-md);
+  box-shadow: var(--lud-shadow-sm);
+  color: var(--lud-ink);
+  text-align: center;
+  transition: transform var(--lud-ease), box-shadow var(--lud-ease), border-color var(--lud-ease);
+}
+.ludik-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--t-accent);
+  box-shadow: var(--lud-shadow-md);
+  color: var(--lud-ink);
+}
+.ludik-tile .lud-i {
+  width: 1.75rem;
+  height: 1.75rem;
+  stroke-width: 1.6;
+  padding: .5rem;
+  box-sizing: content-box;
+  border-radius: var(--lud-r-md);
+  background: var(--t-fond);
+  color: var(--t-accent);
+  transition: transform var(--lud-ease);
+}
+.ludik-tile:hover .lud-i { transform: scale(1.06); }
+
+/* aperçu du rayon : trois couvertures en éventail serré */
+.ludik-tile__apercu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3.25rem;
+}
+.ludik-tile__apercu img {
+  width: 2.5rem;
+  height: 3.25rem;
+  object-fit: cover;
+  border: 1px solid var(--lud-line);
+  border-radius: .35rem;
+  background: var(--lud-surface);
+  box-shadow: var(--lud-shadow-sm);
+  transition: transform var(--lud-ease);
+}
+/* les deux premières se glissent sous la suivante, la pile reste compacte */
+.ludik-tile__apercu img:not(:first-child) { margin-left: -.6rem; }
+.ludik-tile__apercu img:nth-child(1) { transform: rotate(-5deg); }
+.ludik-tile__apercu img:nth-child(3) { transform: rotate(5deg); }
+.ludik-tile:hover .ludik-tile__apercu img:nth-child(1) { transform: rotate(-8deg) translateX(-.15rem); }
+.ludik-tile:hover .ludik-tile__apercu img:nth-child(2) { transform: translateY(-.15rem); }
+.ludik-tile:hover .ludik-tile__apercu img:nth-child(3) { transform: rotate(8deg) translateX(.15rem); }
+.ludik-tile__label {
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+}
+.ludik-tile__badge {
+  position: absolute;
+  top: -.45rem;
+  right: -.2rem;
+  font-size: .625rem;
+  font-weight: 700;
+  padding: .1rem .4rem;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-promo);
+  color: #fff;
+}
+/* accents d'univers, mêmes teintes que les cartes de rayon */
+.ludik-tile--societe { --t-accent: var(--lud-uni-societe); --t-fond: var(--lud-uni-societe-bg); }
+.ludik-tile--tcg     { --t-accent: var(--lud-uni-tcg);     --t-fond: var(--lud-uni-tcg-bg); }
+.ludik-tile--manga   { --t-accent: var(--lud-uni-manga);   --t-fond: var(--lud-uni-manga-bg); }
+.ludik-tile--jdr     { --t-accent: var(--lud-uni-jdr);     --t-fond: var(--lud-uni-jdr-bg); }
+.ludik-tile--bd      { --t-accent: var(--lud-uni-bd);      --t-fond: var(--lud-uni-bd-bg); }
+.ludik-tile--creatif { --t-accent: var(--lud-uni-creatif); --t-fond: var(--lud-uni-creatif-bg); }
+
+@media (max-width: 767px) {
+  /* défilement horizontal : six cases ne tiennent pas sur un téléphone */
+  .ludik-tiles {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    gap: var(--lud-s2);
+    margin-block: var(--lud-s4) var(--lud-s5);
+    padding-bottom: .35rem;
+  }
+  .ludik-tile { flex: 0 0 8.5rem; min-height: 5.25rem; scroll-snap-align: start; }
+}
+
+/* ---------------------------------------------------------------------
+   5.6 Vignette produit
+   --------------------------------------------------------------------- */
+.products {
+  display: grid !important;
+  /* la carte ne descend jamais sous 15 rem : la grille retire une colonne
+     plutôt que de rétrécir les visuels, qui sont l'essentiel de la vignette */
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--lud-s5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Rangées des modules produits : une bande qui défile, cinq cartes visibles
+   à la fois. Une grille figée obligeait à choisir entre cinq cartes larges et
+   dix cartes serrées. */
+.lud-carrousel { position: relative; }
+.module-products .products {
+  display: flex !important;
+  gap: var(--lud-s5);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding-bottom: var(--lud-s1);
+}
+.module-products .products::-webkit-scrollbar { display: none; }
+.module-products .products > * {
+  /* Cinq cartes et quatre gouttières dans la largeur disponible : à quatre,
+     les cartes pesaient plus que les cartes de rayon juste au-dessus. La
+     bande en propose dix. */
+  flex: 0 0 calc((100% - 4 * var(--lud-s5)) / 5);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+@media (max-width: 1199px) { .module-products .products > * { flex: 0 0 calc((100% - 2 * var(--lud-s5)) / 3); } }
+@media (max-width: 991px)  { .module-products .products > * { flex: 0 0 calc((100% - var(--lud-s5)) / 2); } }
+@media (max-width: 767px) {
+  .module-products .products { gap: var(--lud-s3); }
+  .module-products .products > * { flex: 0 0 calc((100% - var(--lud-s3)) / 2); }
+}
+
+/* flèches de la bande, posées à l'extérieur des cartes */
+.lud-carrousel__fleche {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-surface);
+  color: var(--lud-green-800);
+  box-shadow: var(--lud-shadow-md);
+  cursor: pointer;
+  transition: background-color var(--lud-ease), transform var(--lud-ease);
+}
+.lud-carrousel__fleche:hover { background: var(--lud-green-50); transform: translateY(-50%) scale(1.06); }
+.lud-carrousel__fleche[hidden] { display: none; }
+.lud-carrousel__fleche--prev { left: calc(-1 * var(--lud-s6)); }
+.lud-carrousel__fleche--next { right: calc(-1 * var(--lud-s6)); }
+@media (max-width: 1439px) {
+  /* sur écran plus étroit, les flèches se posent sur les bords de la bande */
+  .lud-carrousel__fleche--prev { left: calc(-1 * var(--lud-s2)); }
+  .lud-carrousel__fleche--next { right: calc(-1 * var(--lud-s2)); }
+}
+@media (max-width: 767px) { .lud-carrousel__fleche { display: none !important; } }
+/* en présence de la colonne de rayon, quatre colonnes au plus :
+   cinq rendraient les produits trop petits dans la zone restante */
+@media (min-width: 1200px) { #category .products, #search .products, #manufacturer .products { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.module-products__list { display: block; }
+@media (max-width: 991px) { .products { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 767px) { .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--lud-s3); } }
+
+.product-miniature { height: 100%; }
+.product-miniature__inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--lud-surface);
+  border: none;
+  border-radius: var(--lud-r-md);
+  overflow: hidden;
+  box-shadow: var(--lud-shadow-sm);
+  transition: transform var(--lud-ease), box-shadow var(--lud-ease);
+}
+.product-miniature:hover .product-miniature__inner {
+  transform: translateY(-4px);
+  box-shadow: var(--lud-shadow-lg);
+}
+.product-miniature__top {
+  position: relative;
+  background: var(--lud-surface);
+  overflow: hidden;
+}
+.product-miniature__media { display: block; }
+/* le visuel occupe toute la largeur de la carte : c'est le premier élément
+   que l'œil doit remarquer, la marge intérieure reste donc mince */
+.product-miniature__top img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  padding: var(--lud-s2);
+  background: var(--lud-surface);
+  transition: transform 260ms ease;
+}
+.product-miniature:hover .product-miniature__top img { transform: scale(1.025); }
+.product-miniature__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  flex: 1 1 auto;
+  padding: var(--lud-s2) var(--lud-s5) var(--lud-s5);
+}
+.product-miniature__title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em;
+  font-family: var(--lud-font-title);
+  font-weight: 600;
+  font-size: var(--lud-text-md);
+  line-height: 1.3;
+  color: var(--lud-ink);
+  transition: color var(--lud-ease);
+}
+.product-miniature__title:hover { color: var(--lud-green-600); }
+.product-miniature__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--lud-s2);
+  margin-top: auto;
+}
+.product-miniature__infos { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+.product-miniature__prices { display: flex; align-items: baseline; gap: .4rem; }
+.product-miniature__price {
+  font-family: var(--lud-font-title);
+  font-weight: 800;
+  font-size: 1.375rem;
+  letter-spacing: -.02em;
+  color: var(--lud-green-700);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.product-miniature__regular-price {
+  font-size: var(--lud-text-sm);
+  color: var(--lud-ink-mute);
+  text-decoration: line-through;
+}
+.product-miniature__form { margin: 0; }
+/* l'ajout au panier et l'etat du stock reprennent les primitives .lud-btn-square
+   et .lud-stock : seules les differences propres a la vignette sont ici */
+.product-miniature__add {
+  width: 2.5rem;
+  height: 2.5rem;
+  /* rond : c'est la forme demandée pour l'ajout au panier des grilles */
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-green-600);
+  color: #fff;
+}
+.product-miniature__add:hover { background: var(--lud-green-700); color: #fff; }
+.product-miniature__add.lud-btn-square--ghost {
+  background: var(--lud-surface-alt);
+  border: none;
+  color: var(--lud-green-600);
+}
+.product-miniature__add.lud-btn-square--ghost:hover { background: var(--lud-green-50); color: var(--lud-green-700); }
+.product-miniature__add .lud-i { width: 1.25rem; height: 1.25rem; }
+.product-miniature__add-text { display: none !important; }
+.product-miniature__details { font-weight: 600; }
+.product-miniature__stock { font-size: var(--lud-text-sm); }
+
+/* Bouton « favori », dans l'angle du visuel.
+   Le thème parent habille ce bouton avec des !important sur presque toutes
+   ses propriétés - fond crème, coins carrés, position absolue à 8 px de son
+   conteneur. Pour lui donner la forme du thème il faut répondre avec la même
+   arme ; c'est le seul endroit du fichier où !important est justifié. */
+.product-miniature__favori {
+  position: absolute;
+  z-index: 3;
+  top: var(--lud-s3);
+  right: var(--lud-s3);
+  line-height: 0;
+}
+.product-miniature__favori .wishlist-button { width: auto; height: auto; }
+.product-miniature__favori .wishlist-button-add {
+  position: static !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: var(--lud-r-pill) !important;
+  background-color: rgba(255, 255, 255, .94) !important;
+  color: var(--lud-ink-soft) !important;
+  box-shadow: var(--lud-shadow-sm) !important;
+  transition: color var(--lud-ease), background-color var(--lud-ease), box-shadow var(--lud-ease);
+}
+.product-miniature__favori .wishlist-button-add:hover {
+  background-color: #fff !important;
+  color: var(--lud-alert) !important;
+  box-shadow: var(--lud-shadow-md) !important;
+}
+.product-miniature__favori .wishlist-button-add i { font-size: 1.2rem !important; line-height: 1; }
+
+/* pastilles sur la vignette */
+.product-flags {
+  position: absolute;
+  top: var(--lud-s3);
+  left: var(--lud-s3);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .25rem;
+  margin: 0;
+  padding: 0;
+}
+.product-flags li { list-style: none; }
+/* le catalogue a été créé le même jour lors de la reprise : la pastille
+   « nouveauté » ne veut rien dire tant que les dates ne sont pas réelles */
+.product-flags .badge.new, .product-flags .product-flag.new { display: none; }
+/* Système de pastilles, valable sur la vignette comme sur la fiche :
+   promotion en rouge orangé, épuisé en gris chaud, nouveauté en rose,
+   le reste dans le vert de la maison. */
+.product-flags .badge, .product-flag {
+  display: inline-block;
+  font-size: var(--lud-text-xs);
+  font-weight: 700;
+  letter-spacing: .01em;
+  padding: .24rem .6rem;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-green-800);
+  color: #fff;
+  box-shadow: var(--lud-shadow-sm);
+}
+.product-flags .badge.on-sale, .product-flags .badge.discount,
+.product-flags .badge.discount-percentage, .product-flags .badge.discount-amount {
+  background: var(--lud-promo);
+  color: #fff;
+}
+.product-flags .badge.out_of_stock, .product-flags .badge.out-of-stock {
+  background: var(--lud-surface-alt);
+  color: var(--lud-ink-soft);
+}
+.product-flags .badge.pack { background: var(--lud-uni-jdr); color: #fff; }
+.product-flags .badge.online-only { background: var(--lud-uni-tcg); color: #fff; }
+
+/* aperçu rapide : posé sur le visuel, révélé au survol, jamais au repos.
+   Le bouton ne déplace rien : il est en position absolue au-dessus de l'image. */
+.product-miniature__quickview {
+  position: absolute;
+  z-index: 3;
+  inset: auto var(--lud-s3) var(--lud-s3) var(--lud-s3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  padding: .45rem .8rem;
+  border: none;
+  border-radius: var(--lud-r-pill);
+  background: rgba(255, 255, 255, .96);
+  box-shadow: var(--lud-shadow-sm);
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-xs);
+  font-weight: 700;
+  color: var(--lud-green-700);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--lud-ease), transform var(--lud-ease), background-color var(--lud-ease);
+}
+.product-miniature:hover .product-miniature__quickview,
+.product-miniature__quickview:focus-visible { opacity: 1; transform: translateY(0); }
+.product-miniature__quickview:hover { background: #fff; color: var(--lud-green-800); }
+/* sur un écran tactile, il n'y a pas de survol : le visuel entier reste le lien */
+@media (hover: none) { .product-miniature__quickview { display: none; } }
+
+/* ---------------------------------------------------------------------
+   5.7 Colonne de rayon et panneau de filtres
+   ---------------------------------------------------------------------
+   La colonne mesure 260 px et reste visible pendant le défilement. Sous
+   1200 px elle devient un tiroir (offcanvas-xl de Bootstrap), ouvert par le
+   bouton « Filtrer » de l'en-tête de liste.
+   --------------------------------------------------------------------- */
+.ludik-listing {
+  display: grid;
+  grid-template-columns: 16.25rem minmax(0, 1fr);
+  gap: var(--lud-s8);
+  align-items: start;
+}
+@media (max-width: 1199px) { .ludik-listing { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+
+.ludik-aside { min-width: 0; }
+@media (min-width: 1200px) {
+  /* Colonne collante, sans hauteur maximale ni défilement interne : la
+     colonne des rayons dépasse souvent la hauteur de l'écran, et la brider
+     coupait la dernière section en plein milieu. Sans bride, elle défile
+     avec la page puis se fixe quand son bas est atteint. */
+  .ludik-aside {
+    position: sticky;
+    top: var(--lud-s5);
+    align-self: start;
+  }
+  .ludik-aside .offcanvas-body { display: block; padding: 0; overflow: visible; }
+}
+@media (max-width: 1199px) {
+  .ludik-aside { --bs-offcanvas-width: 21rem; }
+  .ludik-aside .offcanvas-body { display: block; padding: var(--lud-s4); }
+}
+.ludik-aside__header {
+  border-bottom: 1px solid var(--lud-line);
+  padding: var(--lud-s4);
+}
+.ludik-aside__titre {
+  margin: 0;
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-title-sm);
+  font-weight: 700;
+  color: var(--lud-ink);
+}
+
+/* --- Sections de filtre : sous-rayons, disponibilité, sélections, prix ---
+   Deux balisages cohabitent, avec le même habillage :
+     - les sous-rayons, rendus par ps_categorytree, en <details> (aucun script) ;
+     - les facettes, rendues par le thème parent, en accordéon Bootstrap
+       (dont le script gère le curseur de prix et le rechargement de la grille).
+   Les deux portent .lud-facet ; les règles ci-dessous valent pour l'un et
+   l'autre, les sélecteurs propres à chaque balisage sont regroupés à la fin. */
+.lud-facets, #search-filters, #search_filters { display: contents; }
+.lud-facets__list { display: contents; }
+.lud-facets__clear { margin-bottom: var(--lud-s3); }
+.lud-facet {
+  display: block;
+  margin-bottom: var(--lud-s3);
+  background: var(--lud-surface);
+  border: none;
+  border-radius: var(--lud-r-md);
+  box-shadow: var(--lud-shadow-sm);
+  overflow: hidden;
+}
+/* le <details> de ps_categorytree porte la surface, la section la porte déjà */
+.lud-facet > .lud-facet__box { background: none; border: none; box-shadow: none; }
+.lud-facet__box { overflow: hidden; }
+
+.lud-facet__head {
+  display: flex;
+  align-items: center;
+  gap: var(--lud-s2);
+  width: 100%;
+  padding: .8rem var(--lud-s4);
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  text-align: left;
+  transition: background-color var(--lud-ease);
+}
+.lud-facet__head::-webkit-details-marker { display: none; }
+.lud-facet__head:hover { background: var(--lud-green-50); }
+.lud-facet__label {
+  flex: 1 1 auto;
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-md);
+  font-weight: 700;
+  color: var(--lud-green-800);
+}
+.lud-facet__count {
+  flex: 0 0 auto;
+  padding: .05rem .45rem;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-green-50);
+  color: var(--lud-green-700);
+  font-size: var(--lud-text-xs);
+  font-weight: 700;
+}
+/* chevron : dessiné par l'icône pour le <details>, par ::after pour l'accordéon */
+.lud-facet__chevron { color: var(--lud-ink-mute); transition: transform var(--lud-ease); }
+.lud-facet__box[open] > .lud-facet__head .lud-facet__chevron { transform: rotate(180deg); }
+.lud-facet__body { padding: 0 var(--lud-s3) var(--lud-s3); }
+.lud-facet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* deux fonds colorés qui se touchent — l'élément courant et celui survolé —
+     se lisent comme un seul bloc : on les sépare de deux pixels */
+  display: grid;
+  gap: .125rem;
+}
+
+/* lien simple : un sous-rayon, ou une option de liste déroulante */
+.lud-facet__link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lud-s2);
+  padding: .38rem .55rem;
+  border-radius: var(--lud-r-sm);
+  font-size: var(--lud-text-sm);
+  line-height: 1.4;
+  color: var(--lud-ink-soft);
+  transition: background-color var(--lud-ease), color var(--lud-ease);
+}
+.lud-facet__link:hover { background: var(--lud-green-50); color: var(--lud-green-700); }
+.lud-facet__link--all { font-weight: 700; color: var(--lud-green-800); }
+.lud-facet__link.is-current {
+  background: var(--lud-green-600);
+  color: #fff;
+  font-weight: 700;
+}
+.lud-facet__link.is-current:hover { background: var(--lud-green-700); color: #fff; }
+
+/* le reste des sous-rayons, replié */
+.lud-facet__more { margin-top: .25rem; }
+.lud-facet__more > summary {
+  padding: .38rem .55rem;
+  border-radius: var(--lud-r-sm);
+  cursor: pointer;
+  list-style: none;
+  font-size: var(--lud-text-sm);
+  font-weight: 700;
+  color: var(--lud-green-600);
+}
+.lud-facet__more > summary::-webkit-details-marker { display: none; }
+.lud-facet__more > summary::before { content: "+ "; }
+.lud-facet__more[open] > summary::before { content: "− "; }
+.lud-facet__more > summary:hover { background: var(--lud-green-50); }
+
+/* --- Habillage de l'accordéon du thème parent --- */
+.lud-facet.accordion-item { --bs-accordion-btn-focus-box-shadow: none; }
+.lud-facet .accordion-button { font-family: var(--lud-font-title); }
+.lud-facet .accordion-button:not(.collapsed) { background: none; color: inherit; box-shadow: none; }
+.lud-facet .accordion-button::after {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0;
+  background-size: 1rem;
+  filter: grayscale(1) opacity(.5);
+}
+.lud-facet .accordion-button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--lud-green-300);
+}
+.lud-facet .accordion-body {
+  padding: 0 var(--lud-s3) var(--lud-s3);
+  margin: 0;
+  list-style: none;
+  max-height: 18rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.lud-facet .accordion-body > li { list-style: none; }
+.lud-facet .accordion-body > li + li { margin-top: .125rem; }
+
+/* une option de facette : case à cocher, libellé, nombre d'articles */
+.search-filters__item { margin: 0; }
+.search-filters__form-check {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  min-height: 2rem;
+  margin: 0;
+  /* même raison que .lud-facet__list : deux fonds ne doivent pas se toucher */
+  padding: .18rem .55rem;
+  border-radius: var(--lud-r-sm);
+  transition: background-color var(--lud-ease);
+}
+.search-filters__form-check:hover { background: var(--lud-green-50); }
+.search-filters__form-check .form-check-input {
+  flex: 0 0 auto;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  border: 1.5px solid var(--lud-line-strong);
+  border-radius: .3rem;
+  cursor: pointer;
+}
+.search-filters__form-check .form-check-input:checked {
+  background-color: var(--lud-green-600);
+  border-color: var(--lud-green-600);
+}
+.search-filters__form-check .form-check-input:focus {
+  border-color: var(--lud-green-400);
+  box-shadow: 0 0 0 3px rgba(0, 122, 112, .16);
+}
+.search-filters__form-label {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.search-filters__link, .search-filters__color-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lud-s2);
+  width: 100%;
+  font-size: var(--lud-text-sm);
+  line-height: 1.35;
+  color: var(--lud-ink-soft);
+  transition: color var(--lud-ease);
+}
+.search-filters__form-check:hover .search-filters__link,
+.search-filters__form-check:hover .search-filters__color-label { color: var(--lud-green-700); }
+.facet-label.active .search-filters__link,
+.facet-label.active .search-filters__color-label { color: var(--lud-green-800); font-weight: 600; }
+.search-filters__magnitude {
+  flex: 0 0 auto;
+  font-size: var(--lud-text-xs);
+  color: var(--lud-ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+.search-filters .color-sm {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: var(--lud-r-pill);
+  border: 1px solid var(--lud-line-strong);
+  background-size: cover;
+  cursor: pointer;
+}
+
+/* curseur de prix : construit par noUiSlider dans .js-faceted-slider-container */
+.search-filters__slider-container { padding: var(--lud-s5) var(--lud-s5) var(--lud-s4); }
+.search-filters__slider { margin-bottom: var(--lud-s5); }
+.search-filters__slider-values {
+  font-size: var(--lud-text-sm);
+  font-weight: 700;
+  color: var(--lud-ink);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.search-filters .noUi-target {
+  height: .35rem;
+  border: none;
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-green-100);
+  box-shadow: none;
+}
+.search-filters .noUi-connect { background: var(--lud-green-600); }
+.search-filters .noUi-handle {
+  width: 1.15rem;
+  height: 1.15rem;
+  right: -.575rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 2px solid var(--lud-surface);
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-green-700);
+  box-shadow: var(--lud-shadow-md);
+  cursor: grab;
+}
+/* noUiSlider dessine deux traits au centre de la poignée : inutiles ici */
+.search-filters .noUi-handle::before,
+.search-filters .noUi-handle::after { display: none; }
+.search-filters .noUi-handle:focus-visible { outline: 2px solid var(--lud-gold-500); outline-offset: 2px; }
+.search-filters .noUi-handle:active { cursor: grabbing; }
+
+/* filtres actifs, au-dessus de la grille */
+.lud-facets-active, #js-active-search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lud-s2);
+  margin-bottom: var(--lud-s4);
+}
+#js-active-search-filters .filter-block, #js-active-search-filters .active-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .3rem .7rem;
+  border: 1px solid var(--lud-green-200);
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-green-50);
+  color: var(--lud-green-800);
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+}
+
+/* encart d'appel dans la colonne */
+.ludik-aside-promo {
+  border-radius: var(--lud-r-lg);
+  overflow: hidden;
+  border: 1px solid var(--lud-gold-200);
+  background: linear-gradient(160deg, var(--lud-gold-100) 0%, #fff 100%);
+  padding: var(--lud-s5);
+  text-align: center;
+}
+.ludik-aside-promo__script {
+  display: block;
+  font-family: var(--lud-font-script);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--lud-green-800);
+  line-height: 1.2;
+  margin-bottom: var(--lud-s3);
+}
+.ludik-aside-promo .btn { width: 100%; border-radius: var(--lud-r-pill); font-size: var(--lud-text-sm); }
+
+/* ---------------------------------------------------------------------
+   5.8 En-tête de liste : titre, tri, bascule d'affichage
+   --------------------------------------------------------------------- */
+.ludik-listing {
+  background: var(--lud-surface);
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-lg);
+  box-shadow: var(--lud-shadow-sm);
+  padding: clamp(var(--lud-s4), 2vw, var(--lud-s6));
+}
+#js-product-list-header, .block-category { margin-bottom: var(--lud-s4); }
+.block-category h1, #js-product-list-header h1 {
+  font-size: clamp(1.35rem, 2.4vw, var(--lud-title-md));
+  margin-bottom: .2rem;
+}
+.block-category__count, .ludik-listing__count {
+  font-size: var(--lud-text-sm);
+  color: var(--lud-ink-soft);
+}
+.products-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lud-s4);
+  flex-wrap: wrap;
+  margin-bottom: var(--lud-s5);
+  padding-bottom: var(--lud-s4);
+  border-bottom: 1px solid var(--lud-line);
+}
+.products-selection .total-products p, .total-products { font-size: var(--lud-text-sm); color: var(--lud-ink-soft); margin: 0; }
+.products-sort-order .select-title, .products-selection select {
+  border: 1px solid var(--lud-line-strong);
+  border-radius: var(--lud-r-sm);
+  font-size: var(--lud-text-sm);
+  background: var(--lud-surface);
+}
+.ludik-view-toggle { display: inline-flex; gap: .3rem; }
+.ludik-view-toggle a, .ludik-view-toggle button {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--lud-line-strong);
+  border-radius: var(--lud-r-sm);
+  background: var(--lud-surface);
+  color: var(--lud-ink-soft);
+}
+.ludik-view-toggle .is-active {
+  background: var(--lud-green-700);
+  border-color: var(--lud-green-700);
+  color: #fff;
+}
+
+/* pagination */
+.pagination { margin-top: var(--lud-s6); }
+.page-link {
+  border-color: var(--lud-line);
+  color: var(--lud-ink-soft);
+  font-size: var(--lud-text-sm);
+}
+.page-item.active .page-link, .pagination .current a {
+  background: var(--lud-green-700);
+  border-color: var(--lud-green-700);
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------------
+   5.9 Réassurance
+   --------------------------------------------------------------------- */
+.ludik-trust {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--lud-surface);
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-lg);
+  box-shadow: var(--lud-shadow-sm);
+  padding: var(--lud-s4) var(--lud-s3);
+  margin-top: var(--lud-s10);
+}
+.ludik-trust__item {
+  display: flex;
+  align-items: center;
+  gap: var(--lud-s3);
+  padding-inline: var(--lud-s5);
+  border-right: 1px solid var(--lud-line);
+}
+.ludik-trust__item:last-child { border-right: none; }
+.ludik-trust__item .lud-i {
+  width: 1.85rem;
+  height: 1.85rem;
+  stroke-width: 1.5;
+  color: var(--lud-green-500);
+}
+.ludik-trust__item span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+  font-size: var(--lud-text-sm);
+  color: var(--lud-ink-soft);
+}
+.ludik-trust__item strong {
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-base);
+  font-weight: 700;
+  color: var(--lud-ink);
+}
+@media (max-width: 991px) {
+  .ludik-trust { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--lud-s4) 0; }
+  .ludik-trust__item:nth-child(2n) { border-right: none; }
+}
+@media (max-width: 575px) {
+  .ludik-trust { grid-template-columns: 1fr; }
+  .ludik-trust__item { border-right: none; }
+}
+
+/* réassurance sur la fiche produit : grille compacte encadrée */
+.blockreassurance_product, #block-reassurance {
+  background: var(--lud-surface-alt);
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-md);
+  padding: var(--lud-s4);
+  margin-top: var(--lud-s5);
+}
+.blockreassurance_product > div, #block-reassurance > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lud-s3) var(--lud-s6);
+}
+.blockreassurance_product .block-reassurance-item,
+#block-reassurance .block-reassurance-item { display: flex; align-items: center; gap: .65rem; }
+.blockreassurance_product img, #block-reassurance img { width: 1.6rem; height: 1.6rem; }
+.blockreassurance_product span, #block-reassurance span {
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+  color: var(--lud-ink);
+}
+.blockreassurance_product p, #block-reassurance p {
+  margin: 0;
+  font-size: var(--lud-text-xs);
+  color: var(--lud-ink-soft);
+}
+@media (max-width: 767px) {
+  .blockreassurance_product > div, #block-reassurance > div { grid-template-columns: 1fr; }
+}
+
+/* ---------------------------------------------------------------------
+   5.10 Pied de page
+   --------------------------------------------------------------------- */
+footer.footer { background: var(--lud-paper) !important; padding: 0 !important; }
+footer.footer > .footer__before { background: var(--lud-paper) !important; }
+.footer__before { padding-block: 0 var(--lud-s10); }
+#footer, .footer-container { background: transparent; }
+
+.footer__main {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(680px 260px at 3% 0%, rgba(15, 138, 128, .18), transparent 68%),
+    radial-gradient(680px 260px at 98% 100%, rgba(15, 138, 128, .14), transparent 68%),
+    var(--lud-green-950) !important;
+  color: var(--lud-on-dark-soft);
+  padding-top: var(--lud-s12);
+}
+/* deux formes organiques dans les angles, à peine perceptibles : elles
+   réchauffent le bloc sans concurrencer le contenu */
+.footer__main::before,
+.footer__main::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 26rem;
+  height: 26rem;
+  border-radius: 42% 58% 63% 37% / 45% 40% 60% 55%;
+  background: var(--lud-gold-500);
+  opacity: .04;
+  pointer-events: none;
+}
+.footer__main::before { top: -10rem; right: -8rem; }
+.footer__main::after { bottom: -13rem; left: -9rem; background: var(--lud-green-400); opacity: .05; }
+/* Pas de z-index ici : blockwishlist range ses boîtes de dialogue dans le
+   pied de page, et un contexte d'empilement les y enfermait - la modale
+   « Connexion » passait sous les vignettes produit. Les formes décoratives
+   restent au-dessus du texte, mais à 4 % d'opacité et sans interception du
+   pointeur : l'effet est imperceptible. */
+.footer__main > .container-md { position: relative; }
+.ludik-foot {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 3fr);
+  gap: var(--lud-s8) var(--lud-s12);
+  padding-bottom: var(--lud-s10);
+}
+@media (max-width: 991px) { .ludik-foot { grid-template-columns: 1fr; } }
+.ludik-foot__brand img { max-width: 13.5rem; height: auto; }
+.ludik-foot__claim {
+  margin: var(--lud-s5) 0;
+  font-family: var(--lud-font-script);
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #fff;
+  max-width: 14ch;
+}
+.ludik-foot__social { display: flex; gap: var(--lud-s3); }
+.ludik-foot__social a {
+  width: 2.5rem;
+  height: 2.5rem;
+  transition: background-color var(--lud-ease), color var(--lud-ease), transform var(--lud-ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--lud-r-pill);
+  color: #fff;
+  background: rgba(255, 255, 255, .1);
+}
+.ludik-foot__social a:hover { background: var(--lud-gold-500); color: var(--lud-green-950); transform: translateY(-2px); }
+.ludik-foot__cols {
+  display: grid;
+  /* cinq blocs viennent des modules : coordonnees, trois listes de liens, espace client.
+     Une grille a nombre de colonnes fixe evite qu'un bloc decroche seul sur une deuxieme
+     ligne en laissant des cellules vides. */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--lud-s5) var(--lud-s6);
+  align-items: start;
+}
+/* trois colonnes de liens et la lettre d'information, plus large */
+@media (min-width: 992px) { .ludik-foot__cols { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.4fr); } }
+@media (max-width: 767px)  { .ludik-foot__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 479px)  { .ludik-foot__cols { grid-template-columns: 1fr; } }
+/* blockwishlist s'accroche aussi au pied de page pour y ranger ses cinq boîtes
+   de dialogue et son message temporaire. Ces conteneurs, vides à l'écran,
+   occupaient chacun une case de la grille et repoussaient la lettre
+   d'information de plusieurs lignes. En display contents ils ne comptent plus
+   comme case ; les boîtes qu'ils contiennent sont en position fixe et ne
+   prennent donc aucune place non plus. Le message temporaire garde sa position
+   fixe propre. */
+.ludik-foot__cols > .wishlist-add-to,
+.ludik-foot__cols > .wishlist-delete,
+.ludik-foot__cols > .wishlist-create,
+.ludik-foot__cols > .wishlist-login,
+.ludik-foot__cols > .wishlist-rename,
+.ludik-foot__cols > .wishlist-share,
+.ludik-foot__cols > .wishlist-list-modal { display: contents; }
+.ludik-foot__cols > .wishlist-toast { position: fixed; }
+
+/* les modules apportent leurs propres classes de colonne Bootstrap : la grille les ignore */
+.ludik-foot__cols > .footer-block {
+  width: auto !important;
+  max-width: none !important;
+  flex: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.ludik-foot__cols .footer-block { width: auto; max-width: none; flex: none; padding: 0; }
+.footer__main .footer-block__title {
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-base);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 700;
+  color: #fff !important;
+  margin-bottom: var(--lud-s4);
+}
+.footer__main .footer-block__content { display: block; }
+.footer__main .footer-block__content ul { list-style: none; margin: 0; padding: 0; }
+/* `:not(.btn)` n'est pas décoratif : le module favoris rend ses fenêtres de
+   dialogue dans le pied de page (voir .ludik-foot__cols), et sans cette
+   exclusion le bouton « Connexion » de sa fenêtre héritait du vert pâle des
+   liens sur fond sombre - illisible sur son fond jaune. */
+.footer__main a:not(.btn) {
+  color: var(--lud-on-dark-soft);
+  font-size: var(--lud-text-sm);
+  line-height: 2;
+  transition: color var(--lud-ease);
+}
+.footer__main a:not(.btn):hover { color: var(--lud-gold-400); }
+.ludik-coord { display: flex; align-items: flex-start; gap: .7rem; margin-bottom: var(--lud-s3); }
+.ludik-coord .lud-i { width: 1.1rem; height: 1.1rem; margin-top: .18rem; color: var(--lud-gold-400); }
+.ludik-coord span { font-size: var(--lud-text-sm); line-height: 1.5; }
+.ludik-coord strong { display: block; color: #fff; font-weight: 600; }
+.footer__main .copyright, .footer__main .footer__main-bottom {
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  margin-top: 0;
+  padding-block: var(--lud-s5);
+  text-align: center;
+  font-size: var(--lud-text-xs);
+  color: var(--lud-on-dark-mute);
+}
+.footer__main .copyright a { font-size: var(--lud-text-xs); }
+.ludik-copyright {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--lud-s2) var(--lud-s5);
+  text-align: left !important;
+}
+.ludik-copyright p { margin: 0; }
+.ludik-copyright__droite { display: inline-flex; align-items: center; gap: var(--lud-s4); }
+@media (max-width: 575px) { .ludik-copyright { justify-content: center; text-align: center !important; } }
+
+/* lettre d'information, en colonne du pied de page */
+.ludik-foot__lettre {
+  padding: var(--lud-s5);
+  border-radius: var(--lud-r-lg);
+  background: rgba(255, 255, 255, .07);
+}
+/* La lettre d'information est calée sur la dernière colonne, première ligne :
+   un module qui s'accrocherait au pied de page ne peut plus la déplacer. */
+@media (min-width: 992px) { .ludik-foot__lettre { grid-column: 4; grid-row: 1; } }
+@media (max-width: 991px) { .ludik-foot__lettre { grid-column: 1 / -1; } }
+.ludik-foot__lettre-titre {
+  margin: 0 0 var(--lud-s2);
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-md);
+  font-weight: 700;
+  color: #fff;
+}
+.ludik-foot__lettre-texte {
+  margin: 0 0 var(--lud-s4);
+  font-size: var(--lud-text-sm);
+  line-height: 1.6;
+  color: var(--lud-on-dark-soft);
+}
+.ludik-foot__lettre-champ {
+  display: flex;
+  align-items: stretch;
+  border-radius: var(--lud-r-md);
+  overflow: hidden;
+  background: var(--lud-surface);
+}
+.ludik-foot__lettre-champ input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 2.75rem;
+  padding: 0 var(--lud-s4);
+  border: none;
+  background: transparent;
+  font-size: var(--lud-text-sm);
+  color: var(--lud-ink);
+}
+.ludik-foot__lettre-champ input::placeholder { color: var(--lud-ink-mute); }
+.ludik-foot__lettre-champ input:focus { outline: none; }
+.ludik-foot__lettre-champ:focus-within { box-shadow: 0 0 0 3px rgba(255, 191, 24, .45); }
+.ludik-foot__lettre-champ button {
+  flex: 0 0 auto;
+  width: 2.75rem;
+  border: none;
+  background: var(--lud-gold-500);
+  color: var(--lud-green-900);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--lud-ease);
+}
+.ludik-foot__lettre-champ button:hover { background: var(--lud-gold-600); }
+.ludik-foot__lettre-message {
+  margin: 0 0 var(--lud-s3);
+  padding: var(--lud-s2) var(--lud-s3);
+  border-radius: var(--lud-r-sm);
+  background: rgba(255, 255, 255, .12);
+  font-size: var(--lud-text-sm);
+  color: #fff;
+}
+.ludik-foot__lettre-message.is-error { background: rgba(179, 64, 44, .35); }
+.ludik-foot__lettre-mentions,
+.ludik-foot__lettre-consentement {
+  margin: var(--lud-s3) 0 0;
+  font-size: var(--lud-text-xs);
+  line-height: 1.5;
+  color: var(--lud-on-dark-mute);
+}
+
+/* =====================================================================
+   6. PAGES
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   6.1 Accueil
+   --------------------------------------------------------------------- */
+/* Le thème parent fait de la page d'accueil une grille avec un écart propre.
+   C'est lui qui règle le rythme vertical entre le hero, les rayons et les
+   rangées de produits : une marge sur les blocs s'y ajouterait. */
+.page-content--home { gap: var(--lud-section); }
+.ludik-home > * + * { margin-top: var(--lud-section); }
+/* Le bandeau d'avantages sert de transition sous la bannière soirée : il s'en
+   rapproche, au lieu de flotter à égale distance des deux blocs. */
+.footer__before > .container-md + .container-md { margin-top: var(--lud-s5); }
+.footer__before { padding-block: 0 var(--lud-section); }
+/* les sections de ludikhome sont espacées entre elles par la règle
+   « > * + * » ci-dessus, jamais par une marge propre */
+.ludik-section { margin-block: 0; }
+.module-products { margin-block: 0; }
+.module-products__footer { display: flex; justify-content: center; margin-top: var(--lud-s6); }
+
+/* ---------------------------------------------------------------------
+   Cartes de rayon - l'entrée principale vers le catalogue
+   ---------------------------------------------------------------------
+   Une seule présentation des rayons : couvertures du rayon en haut sur un
+   fond teinté de son accent, puis pictogramme, nom, premiers sous-rayons et
+   nombre de produits. Il y avait auparavant deux présentations des mêmes
+   rayons, une rangée de petites cases et ces cartes.
+   --------------------------------------------------------------------- */
+.ludik-univers {
+  display: grid;
+  /* les six rayons sur une seule ligne : deux lignes de trois cartes larges
+     répétaient la même information sur deux écrans de hauteur */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--lud-s4);
+}
+@media (max-width: 1279px) { .ludik-univers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--lud-s5); } }
+@media (max-width: 767px)  { .ludik-univers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 479px)  { .ludik-univers { grid-template-columns: 1fr; } }
+.ludik-univers a {
+  /* l'accent du rayon, redéfini plus bas par .u-* : sans modificateur, la
+     carte reste dans le vert Ludik */
+  --u-accent: var(--lud-green-600);
+  --u-fond: var(--lud-green-50);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--lud-r-lg);
+  background: var(--lud-surface);
+  border: none;
+  box-shadow: var(--lud-shadow-sm);
+  color: var(--lud-ink);
+  overflow: hidden;
+  transition: transform var(--lud-ease), box-shadow var(--lud-ease);
+}
+.ludik-univers a:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--lud-shadow-lg);
+}
+
+/* Visuel du rayon : un seul produit, en grand, sur le fond teinté de
+   l'univers. Une rangée de quatre couvertures se lisait comme une vignette
+   de catalogue, pas comme un article. */
+.ludik-univers .u-covers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* +20 % : les visuels paraissaient posés dans beaucoup de vide */
+  height: 15rem;
+  /* aucune marge intérieure : le visuel occupe toute la zone qui lui est
+     réservée, il était sinon perdu au milieu d'un carré blanc */
+  padding: 0;
+  overflow: hidden;
+  /* fond blanc : les visuels produits sont détourés sur blanc, une teinte
+     derrière eux dessinait un carré plus clair au milieu de la carte */
+  background: var(--lud-surface);
+}
+.ludik-univers .u-covers img {
+  width: 100%;
+  height: 100%;
+  /* La photo remplit la zone qui lui est réservée. En « contain » elle était
+     mise en boîte, avec deux bandes blanches sur les côtés ; les visuels du
+     catalogue étant presque carrés et le produit centré, le recadrage de
+     « cover » ne coupe qu'une marge blanche.
+     Le léger agrandissement absorbe le reste de marge blanche. L'essentiel
+     du travail est fait en amont : les visuels de vitrine sont choisis par
+     taux de remplissage mesuré, voir la constante UNIVERS du module. */
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.06);
+  transition: transform var(--lud-ease);
+}
+.ludik-univers a:hover .u-covers img { transform: scale(1.1) translateY(-3px); }
+
+/* corps de la carte */
+.ludik-univers .u-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lud-s2);
+  flex: 1 1 auto;
+  padding: var(--lud-s4);
+}
+.ludik-univers .u-head { display: flex; flex-direction: column; align-items: flex-start; gap: var(--lud-s2); }
+.ludik-univers .u-head .lud-i {
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: .45rem;
+  box-sizing: content-box;
+  border-radius: var(--lud-r-md);
+  background: var(--u-fond);
+  color: var(--u-accent);
+}
+.ludik-univers .u-title {
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  font-size: var(--lud-title-sm);
+  line-height: 1.2;
+  letter-spacing: -.025em;
+}
+.ludik-univers .u-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--lud-text-sm);
+  color: var(--lud-ink-soft);
+  line-height: 1.5;
+}
+.ludik-univers .u-count {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-top: auto;
+  padding-top: var(--lud-s3);
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-sm);
+  font-weight: 700;
+  color: var(--u-accent);
+  transition: gap var(--lud-ease);
+}
+.ludik-univers a:hover .u-count { gap: .6rem; }
+
+/* accents d'univers : une teinte de fond très légère et une couleur de lien */
+.ludik-univers a.u-societe { --u-accent: var(--lud-uni-societe); --u-fond: var(--lud-uni-societe-bg); }
+.ludik-univers a.u-tcg     { --u-accent: var(--lud-uni-tcg);     --u-fond: var(--lud-uni-tcg-bg); }
+.ludik-univers a.u-manga   { --u-accent: var(--lud-uni-manga);   --u-fond: var(--lud-uni-manga-bg); }
+.ludik-univers a.u-jdr     { --u-accent: var(--lud-uni-jdr);     --u-fond: var(--lud-uni-jdr-bg); }
+.ludik-univers a.u-bd      { --u-accent: var(--lud-uni-bd);      --u-fond: var(--lud-uni-bd-bg); }
+.ludik-univers a.u-creatif { --u-accent: var(--lud-uni-creatif); --u-fond: var(--lud-uni-creatif-bg); }
+
+/* ---------------------------------------------------------------------
+   Bannière événementielle - la soirée du mardi
+   ---------------------------------------------------------------------
+   Une bannière plutôt qu'un bloc de texte : illustration en fond, date très
+   visible dans une carte claire, et un seul appel à l'action.
+   --------------------------------------------------------------------- */
+.ludik-event {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, .65fr);
+  align-items: center;
+  gap: clamp(var(--lud-s5), 3vw, var(--lud-s10));
+  padding: clamp(var(--lud-s6), 3.5vw, var(--lud-s10));
+  border-radius: var(--lud-r-xl);
+  overflow: hidden;
+  background: var(--lud-green-900);
+  color: #fff;
+}
+@media (max-width: 991px) { .ludik-event { grid-template-columns: minmax(0, 1fr); } }
+
+/* illustration : la mosaïque de couvertures composée pour les campagnes,
+   recouverte d'un dégradé pour que le texte reste lisible */
+.ludik-event__fond {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(90deg, rgba(3, 51, 48, .94) 0%, rgba(3, 51, 48, .78) 40%, rgba(3, 51, 48, .42) 100%),
+    url('../img/soiree-jeux.jpg');
+  background-size: cover, cover;
+  background-position: center, center;
+  pointer-events: none;
+}
+.ludik-event__corps, .ludik-event__date { position: relative; z-index: 1; }
+.ludik-event__corps { display: flex; flex-direction: column; align-items: flex-start; gap: var(--lud-s4); }
+.ludik-event__kicker {
+  margin: 0;
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-sm);
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lud-gold-400);
+}
+.ludik-event__titre {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, var(--lud-title-md));
+  font-weight: 800;
+  letter-spacing: -.025em;
+  color: #fff !important;
+}
+.ludik-event__texte {
+  margin: 0;
+  max-width: 48ch;
+  font-size: var(--lud-text-md);
+  line-height: 1.6;
+  color: var(--lud-green-100);
+}
+
+/* carte de la prochaine séance */
+.ludik-event__date {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lud-s2);
+  padding: var(--lud-s5);
+  border-radius: var(--lud-r-lg);
+  background: rgba(255, 255, 255, .95);
+  color: var(--lud-ink);
+}
+.ludik-event__date-label {
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+  color: var(--lud-ink-soft);
+}
+.ludik-event__date-jour {
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-title-sm);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--lud-green-800);
+}
+.ludik-event__date-heure,
+.ludik-event__date-lieu {
+  display: flex;
+  align-items: flex-start;
+  gap: .45rem;
+  font-size: var(--lud-text-sm);
+  line-height: 1.45;
+  color: var(--lud-ink-soft);
+}
+.ludik-event__date-heure .lud-i,
+.ludik-event__date-lieu .lud-i { flex: 0 0 auto; margin-top: .15rem; color: var(--lud-green-600); }
+.ludik-event__date-lieu { padding-top: var(--lud-s2); border-top: 1px solid var(--lud-line); margin-top: var(--lud-s1); }
+
+/* ---------------------------------------------------------------------
+   Avantages - quatre cartes avant le pied de page
+   --------------------------------------------------------------------- */
+.ludik-trust {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--lud-s4);
+}
+.ludik-trust__item {
+  display: flex;
+  align-items: center;
+  gap: var(--lud-s4);
+  padding: var(--lud-s5);
+  background: var(--lud-surface);
+  border-radius: var(--lud-r-md);
+  box-shadow: var(--lud-shadow-sm);
+}
+.ludik-trust__item .lud-i {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke-width: 1.6;
+  padding: .55rem;
+  box-sizing: content-box;
+  border-radius: var(--lud-r-md);
+  background: var(--lud-green-50);
+  color: var(--lud-green-600);
+}
+.ludik-trust__item span {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  line-height: 1.4;
+  font-size: var(--lud-text-sm);
+  color: var(--lud-ink-soft);
+}
+.ludik-trust__item strong {
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-base);
+  font-weight: 700;
+  color: var(--lud-ink);
+}
+@media (max-width: 1199px) { .ludik-trust { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 575px)  { .ludik-trust { grid-template-columns: 1fr; } }
+
+/* ---------------------------------------------------------------------
+   Cartes boutique - photo, coordonnées, horaires, itinéraire
+   ---------------------------------------------------------------------
+   Les données viennent des fiches magasin du back-office.
+   --------------------------------------------------------------------- */
+.ludik-shops {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lud-s5);
+}
+@media (max-width: 991px) { .ludik-shops { grid-template-columns: 1fr; } }
+.ludik-shop {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  gap: 0;
+  background: var(--lud-surface);
+  border-radius: var(--lud-r-lg);
+  box-shadow: var(--lud-shadow-sm);
+  overflow: hidden;
+}
+@media (max-width: 575px) { .ludik-shop { grid-template-columns: minmax(0, 1fr); } }
+.ludik-shop__photo { background: var(--lud-surface-alt); }
+.ludik-shop__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 575px) { .ludik-shop__photo img { height: 10rem; } }
+.ludik-shop__corps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lud-s3);
+  padding: var(--lud-s5);
+}
+.ludik-shop__nom {
+  margin: 0;
+  font-size: var(--lud-title-sm);
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.ludik-shop__infos { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--lud-s2); align-content: start; }
+.ludik-shop__infos li {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
+  font-size: var(--lud-text-sm);
+  line-height: 1.5;
+  color: var(--lud-ink-soft);
+}
+.ludik-shop__infos .lud-i { flex: 0 0 auto; margin-top: .18rem; color: var(--lud-green-600); }
+.ludik-shop__infos a { color: var(--lud-green-700); }
+.ludik-shop__infos a:hover { color: var(--lud-green-800); text-decoration: underline; }
+.ludik-shop__actions { display: flex; flex-wrap: wrap; gap: var(--lud-s2); padding-top: var(--lud-s3); }
+
+/* horaires : une ligne par plage de jours, l'heure alignée à droite.
+   Le bloc est poussé en bas de carte pour se répondre d'une boutique à
+   l'autre, quelles que soient les coordonnées renseignées. */
+.ludik-shop__horaires {
+  display: grid;
+  gap: .15rem;
+  width: 100%;
+  margin-top: auto;
+  padding-top: var(--lud-s3);
+  border-top: 1px solid var(--lud-line);
+  font-size: var(--lud-text-sm);
+}
+.ludik-shop__horaires-titre {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0 0 .35rem;
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-sm);
+  font-weight: 700;
+  color: var(--lud-ink);
+}
+.ludik-shop__horaires-titre .lud-i { color: var(--lud-green-600); }
+.ludik-shop__horaire {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--lud-s3);
+}
+.ludik-shop__jours { color: var(--lud-ink-soft); }
+.ludik-shop__plage {
+  font-weight: 600;
+  color: var(--lud-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------
+   6.2 Fiche produit
+   --------------------------------------------------------------------- */
+.product__container {
+  display: grid;
+  /* la galerie prend un peu plus de la moitié : c'est le visuel qui vend */
+  grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+  align-items: start;
+  background: var(--lud-surface);
+  border: none;
+  border-radius: var(--lud-r-xl);
+  box-shadow: var(--lud-shadow-sm);
+  padding: clamp(var(--lud-s4), 2.4vw, var(--lud-s8));
+  gap: clamp(var(--lud-s5), 3vw, var(--lud-s10));
+}
+.product__left, .product__right { min-width: 0; }
+@media (max-width: 991px) { .product__container { grid-template-columns: minmax(0, 1fr); } }
+.product__bottom { gap: var(--lud-s4); margin-top: var(--lud-s4); }
+.product__bottom-left, .product__bottom-right,
+.product-comments-wrapper, .ps-categoryproducts, .ps-crossselling, .ps-viewedproduct {
+  background: var(--lud-surface);
+  border: none;
+  border-radius: var(--lud-r-xl);
+  box-shadow: var(--lud-shadow-sm);
+  padding: clamp(var(--lud-s4), 2.2vw, var(--lud-s6));
+  margin-top: var(--lud-s4);
+}
+.product__bottom-right:empty, .product__bottom-left:empty { display: none; }
+
+.product__name {
+  font-size: clamp(1.5rem, 2.8vw, var(--lud-title-lg)) !important;
+  font-weight: 800;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+  margin-bottom: .4rem;
+}
+.product__prices { margin-block: var(--lud-s2) var(--lud-s4); }
+.product__price {
+  font-family: var(--lud-font-title);
+  font-size: clamp(1.9rem, 3.4vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--lud-green-700);
+}
+.product__tax-infos, .product__tax-label, .product-tax-label { display: none !important; }
+.product__regular-price { font-size: 1rem; color: var(--lud-ink-mute); text-decoration: line-through; }
+.product__discount-percentage, .product__discount-amount {
+  background: var(--lud-promo);
+  color: #fff !important;
+  border-radius: var(--lud-r-pill);
+  padding: .15rem .6rem;
+  font-size: var(--lud-text-sm);
+  font-weight: 700;
+}
+.product__reference, #product_reference { font-size: var(--lud-text-sm); color: var(--lud-ink-soft); }
+
+.product__availability-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: var(--lud-text-base);
+  font-weight: 600;
+  margin-bottom: .25rem;
+}
+.product__availability-status .material-icons { display: none; }
+.product__availability-status::before {
+  content: "";
+  width: .5rem;
+  height: .5rem;
+  border-radius: var(--lud-r-pill);
+  background: currentColor;
+}
+.product__availability-status.text-success { color: var(--lud-stock) !important; }
+.product__availability-status.text-warning { color: var(--lud-warn) !important; }
+.product__availability-status.text-danger { color: var(--lud-alert) !important; }
+.product__delivery-infos { font-size: var(--lud-text-sm); color: var(--lud-ink-soft); }
+
+.product__actions-qty-add { display: flex; gap: var(--lud-s3); align-items: stretch; margin-top: var(--lud-s4); }
+.quantity-button {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--lud-line-strong);
+  border-radius: var(--lud-r-md);
+  overflow: hidden;
+  background: var(--lud-surface);
+}
+.quantity-button button {
+  width: 2.5rem;
+  border: none;
+  background: var(--lud-surface);
+  color: var(--lud-green-700);
+  font-size: 1.1rem;
+}
+.quantity-button button:hover { background: var(--lud-green-50); }
+.product__quantity .form-control, .quantity-button input {
+  width: 3.25rem;
+  height: 3.25rem;
+  border: none;
+  text-align: center;
+  font-weight: 700;
+  font-size: var(--lud-text-md);
+}
+.product__add-to-cart { flex: 1 1 auto; }
+.product__add-to-cart-button {
+  width: 100%;
+  height: 3.25rem;
+  border-radius: var(--lud-r-md);
+  background: var(--lud-gold-500) !important;
+  border-color: var(--lud-gold-500) !important;
+  color: var(--lud-green-900) !important;
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  font-size: 1.05rem;
+  gap: .6rem;
+}
+.product__add-to-cart-button:hover {
+  background: var(--lud-gold-600) !important;
+  border-color: var(--lud-gold-600) !important;
+}
+.product__add-to-cart-button .material-icons { font-size: 1.3rem; }
+
+/* galerie */
+.product__images { gap: var(--lud-s3); }
+.product-cover img, .product__cover img {
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-md);
+  background: var(--lud-surface);
+}
+.product__thumbnails img, .thumbnails img, .js-thumb {
+  border: 2px solid transparent;
+  border-radius: var(--lud-r-sm);
+  background: var(--lud-surface);
+}
+.product__thumbnails .selected img, .js-thumb.selected, img.selected { border-color: var(--lud-gold-500); }
+.product__cover-zoom, .layer, .product__zoom-button {
+  border-radius: var(--lud-r-pill);
+  background: rgba(255, 255, 255, .94);
+  border: 1px solid var(--lud-line);
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+  color: var(--lud-ink);
+}
+
+/* sections de la fiche */
+.product__bottom-left h2, .product__bottom-right h2,
+.product__bottom h3, .product-comments-wrapper h2,
+.ps-categoryproducts h2, .ps-categoryproducts .h2,
+.ps-crossselling h2, .ps-viewedproduct h2 {
+  position: relative;
+  padding-left: .85rem;
+  font-size: var(--lud-title-sm);
+  font-weight: 700;
+  color: var(--lud-ink);
+  margin-bottom: var(--lud-s4);
+}
+.product__bottom-left h2::before, .product__bottom-right h2::before,
+.product__bottom h3::before, .product-comments-wrapper h2::before,
+.ps-categoryproducts h2::before, .ps-categoryproducts .h2::before,
+.ps-crossselling h2::before, .ps-viewedproduct h2::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .18em;
+  bottom: .18em;
+  width: 4px;
+  border-radius: 4px;
+  background: var(--lud-gold-500);
+}
+.product__description, .product-description {
+  font-size: var(--lud-text-base);
+  line-height: 1.75;
+  color: var(--lud-ink-soft);
+}
+.product__description p { margin-bottom: var(--lud-s3); }
+.data-sheet, .product-features table { width: 100%; font-size: var(--lud-text-base); }
+.data-sheet dt, .product-features dt {
+  background: var(--lud-surface-alt);
+  font-weight: 600;
+  color: var(--lud-ink);
+}
+.data-sheet dd, .data-sheet dt { padding: .6rem .85rem; border-bottom: 1px solid var(--lud-line); }
+.ps-categoryproducts .module-products, .ps-crossselling .module-products { margin: 0; }
+
+/* Boîtes de dialogue et messages du module favoris.
+   Le module cale ses fenêtres sur l'échelle d'origine de Bootstrap
+   (1051-1053), pensée pour un voile à 1050 ; ici le voile est à 1140 pour
+   passer devant l'en-tête. Sans correction, la fenêtre s'ouvre SOUS son
+   propre voile : l'écran s'assombrit et plus rien n'est cliquable.
+
+   Le `!important` est nécessaire, comme pour le coeur des vignettes : les
+   feuilles du module sont compilées dans ses paquets JavaScript et injectées
+   dans <head> à l'exécution, donc après la nôtre, avec des sélecteurs au
+   moins aussi spécifiques que le nôtre - un par fenêtre :
+   « .wishlist-create .wishlist-modal.show », « .wishlist-login … »,
+   « .wishlist-delete … », « .wishlist-share … », et pour le renommage
+   « .wishlist-rename .wishlist-modal.show[data-v-02ac532b] ». À spécificité
+   égale, la dernière déclarée gagne, et ce n'est jamais la nôtre. */
+.wishlist-modal.show, .wishlist-list-modal.show { z-index: 1150 !important; }
+/* le module n'ajoute pas la classe qui rend le voile opaque : la boîte
+   flottait sur une page non assombrie */
+.wishlist-modal.show + .modal-backdrop,
+.wishlist-list-modal.show + .modal-backdrop { opacity: .5; }
+.wishlist-toast { z-index: 1200; }
+
+/* messages temporaires : confirmation d'ajout au panier, erreurs.
+   Le balisage vient du thème parent, l'affichage de assets/js/custom.js. */
+.toast-container { z-index: 1200; }
+.lud-toast {
+  min-width: 18rem;
+  margin-bottom: var(--lud-s3);
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-md);
+  background: var(--lud-surface);
+  box-shadow: var(--lud-shadow-lg);
+  border-left: 4px solid var(--lud-stock);
+}
+.lud-toast--erreur { border-left-color: var(--lud-alert); }
+.lud-toast .toast-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--lud-s2) var(--lud-s4);
+  padding: var(--lud-s4);
+  font-size: var(--lud-text-base);
+  font-weight: 600;
+  color: var(--lud-ink);
+}
+.lud-toast__lien {
+  font-weight: 700;
+  color: var(--lud-green-600);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lud-toast__lien:hover { color: var(--lud-green-800); }
+
+/* pulsation du compteur du panier, pour que la mise à jour se remarque */
+@keyframes lud-pulse {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+.lud-pulse { animation: lud-pulse 420ms ease; }
+@media (prefers-reduced-motion: reduce) { .lud-pulse { animation: none; } }
+
+/* écran vide : page introuvable, rayon sans produit, recherche sans résultat */
+.lud-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--lud-s4);
+  padding: clamp(var(--lud-s8), 6vw, var(--lud-s16)) var(--lud-s5);
+  background: var(--lud-surface);
+  border-radius: var(--lud-r-lg);
+  box-shadow: var(--lud-shadow-sm);
+  text-align: center;
+}
+.lud-empty > p { max-width: 44ch; margin: 0; color: var(--lud-ink-soft); }
+.lud-empty > p.h2, .lud-empty > .h3 { color: var(--lud-ink); }
+.lud-empty > .lud-btn { margin-top: var(--lud-s3); }
+
+/* fiche technique : une vraie table à deux colonnes */
+.lud-specs { margin: 0; }
+.lud-specs__row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr);
+  gap: var(--lud-s4);
+  padding: .7rem 0;
+  border-bottom: 1px solid var(--lud-line);
+}
+.lud-specs__row:last-child { border-bottom: none; }
+.lud-specs dt {
+  margin: 0;
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+  color: var(--lud-ink-soft);
+}
+.lud-specs dd {
+  margin: 0;
+  font-size: var(--lud-text-base);
+  color: var(--lud-ink);
+}
+.lud-specs dd a { color: var(--lud-green-600); }
+@media (max-width: 575px) {
+  .lud-specs__row { grid-template-columns: minmax(0, 1fr); gap: .15rem; }
+}
+
+/* ---------------------------------------------------------------------
+   6.3 Pages éditoriales
+   --------------------------------------------------------------------- */
+#cms .page-content, .cms-page .page-content, #cms #content {
+  background: var(--lud-surface);
+  border: none;
+  border-radius: var(--lud-r-xl);
+  box-shadow: var(--lud-shadow-sm);
+  padding: clamp(var(--lud-s5), 3vw, var(--lud-s10));
+}
+/* une ligne de texte au-delà de 75 caractères devient pénible à suivre */
+#cms .page-content > *, .cms-page .page-content > * { max-width: 72ch; }
+#cms .page-content > .ludik-args { max-width: none; }
+#cms .page-header h1, .cms-page h1 {
+  font-size: clamp(1.75rem, 3vw, var(--lud-title-lg));
+  font-weight: 800;
+  letter-spacing: -.025em;
+  margin-bottom: var(--lud-s5);
+}
+#cms .page-content h2, .cms-page h2 {
+  font-size: var(--lud-title-md);
+  margin: var(--lud-s8) 0 var(--lud-s3);
+  color: var(--lud-green-700);
+}
+#cms .page-content h2:first-child { margin-top: 0; }
+#cms .page-content p, #cms .page-content li {
+  font-size: var(--lud-text-md);
+  line-height: 1.8;
+  color: var(--lud-ink-soft);
+}
+#cms .page-content ul { margin: 0 0 var(--lud-s5) 1.1rem; }
+#cms .page-content li { margin-bottom: .35rem; }
+#cms .page-content strong { color: var(--lud-ink); }
+#cms .page-content a { color: var(--lud-green-600); text-decoration: underline; text-underline-offset: 3px; }
+#cms .page-content hr { border-color: var(--lud-line); margin-block: var(--lud-s6); }
+
+/* trois arguments en cartes, comme sur la maquette « Cartes cadeaux » */
+.ludik-args {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--lud-s4);
+  margin-top: var(--lud-s6);
+}
+.ludik-arg {
+  display: flex;
+  align-items: center;
+  gap: var(--lud-s3);
+  padding: var(--lud-s4);
+  border-radius: var(--lud-r-md);
+  background: var(--lud-surface);
+  box-shadow: var(--lud-shadow-sm);
+}
+.ludik-arg .lud-i { width: 1.9rem; height: 1.9rem; color: var(--lud-gold-500); stroke-width: 1.6; }
+.ludik-arg span { display: flex; flex-direction: column; line-height: 1.35; font-size: var(--lud-text-sm); color: var(--lud-ink-soft); }
+.ludik-arg strong { font-family: var(--lud-font-title); font-size: var(--lud-text-base); color: var(--lud-ink); }
+
+/* ---------------------------------------------------------------------
+   6.4 Panier, tunnel, compte
+   --------------------------------------------------------------------- */
+.cart-grid-body .card, .cart-grid-right .card,
+#checkout .card, .checkout-step, .card,
+#authentication .card, #identity .card, #history .card, #addresses .card {
+  background: var(--lud-surface);
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-lg);
+  box-shadow: var(--lud-shadow-sm);
+}
+.checkout-step .step-title, .card-header, .cart-summary .h4 {
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  color: var(--lud-ink);
+  background: transparent;
+  border-bottom-color: var(--lud-line);
+}
+.checkout-step.-current .step-number, .step-number {
+  background: var(--lud-green-700);
+  color: #fff;
+  border-radius: var(--lud-r-pill);
+}
+.cart-total, .cart-summary-line--total, .cart-summary-totals {
+  font-family: var(--lud-font-title);
+  font-weight: 800;
+  color: var(--lud-ink);
+}
+.delivery-option, .payment-option {
+  border: 1px solid var(--lud-line);
+  border-radius: var(--lud-r-md);
+  padding: var(--lud-s4);
+  margin-bottom: var(--lud-s3);
+  background: var(--lud-surface);
+}
+.delivery-option:hover, .payment-option:hover { border-color: var(--lud-green-300); }
+.delivery-option .carrier-name, .payment-option label {
+  font-family: var(--lud-font-title);
+  font-weight: 600;
+  color: var(--lud-ink);
+}
+.delivery-option .carrier-delay, .payment-option .additional-information {
+  font-size: var(--lud-text-sm);
+  color: var(--lud-ink-soft);
+}
+#checkout .btn-primary, .cart-detailed-actions .btn-primary { min-height: 3rem; font-size: var(--lud-text-md); }
+
+/* =====================================================================
+   7. UTILITAIRES
+   ===================================================================== */
+.lud-stack-2 > * + * { margin-top: var(--lud-s2); }
+.lud-stack-4 > * + * { margin-top: var(--lud-s4); }
+.lud-stack-6 > * + * { margin-top: var(--lud-s6); }
+.lud-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lud-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.lud-muted { color: var(--lud-ink-soft); }
+.lud-script { font-family: var(--lud-font-script); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ---------------------------------------------------------------------
+   Alias de compatibilité : les gabarits des modules produits utilisent
+   les classes historiques. À retirer quand tous seront passés en lud-*.
+   --------------------------------------------------------------------- */
+.ludik-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--lud-s6);
+  margin-bottom: var(--lud-s6);
+}
+.ludik-section-head h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 2.8vw, var(--lud-title-md));
+  font-weight: 800;
+  letter-spacing: -.03em;
+}
+.ludik-section-head p { margin: .4rem 0 0; font-size: var(--lud-text-base); color: var(--lud-ink-soft); }
+.ludik-section-head > a {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-family: var(--lud-font-title);
+  font-weight: 700;
+  font-size: var(--lud-text-base);
+  color: var(--lud-green-700);
+  white-space: nowrap;
+  transition: gap var(--lud-ease), color var(--lud-ease);
+}
+.ludik-section-head > a:hover { color: var(--lud-green-800); gap: .6rem; }
+.btn-ghost {
+  border: 1px solid rgba(255, 255, 255, .3);
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font-family: var(--lud-font-title);
+  font-weight: 600;
+}
+.btn-ghost:hover { background: rgba(255, 255, 255, .16); color: #fff; }
+
+/* ---------------------------------------------------------------------
+   Page de rayon : colonne de gauche en cartes, en-tête et grille
+   dans une même surface, sous-rayons en pastilles.
+   --------------------------------------------------------------------- */
+.columns-container { max-width: var(--lud-page); }
+/* en-tête de rayon : nom, volume, description */
+#js-product-list-header { margin-bottom: var(--lud-s5); }
+.category__header { padding: 0; background: none; border: none; box-shadow: none; }
+.category__header .page-title-section, .category__header h1 {
+  font-size: clamp(1.75rem, 3vw, var(--lud-title-lg));
+  font-weight: 800;
+  letter-spacing: -.025em;
+  margin: 0 0 var(--lud-s2);
+}
+.category__count {
+  margin: 0;
+  font-size: var(--lud-text-md);
+  color: var(--lud-ink-soft);
+}
+.category__count strong { color: var(--lud-ink); font-weight: 700; }
+.category__count-sep { margin-inline: .3rem; color: var(--lud-ink-mute); }
+.category__description {
+  max-width: 60ch;
+  margin: var(--lud-s3) 0 0;
+  font-size: var(--lud-text-base);
+  line-height: 1.7;
+  color: var(--lud-ink-soft);
+}
+.category__description p:last-child { margin-bottom: 0; }
+/* le visuel de rayon du thème parent n'existe pas dans le catalogue repris */
+.category__cover { display: none; }
+
+/* raccourcis de rayon sous un titre de recherche */
+.lud-chips { display: flex; flex-wrap: wrap; gap: var(--lud-s2); margin-top: var(--lud-s4); }
+.lud-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: .38rem .85rem;
+  border: 1px solid var(--lud-line-strong);
+  border-radius: var(--lud-r-pill);
+  background: var(--lud-surface);
+  font-size: var(--lud-text-sm);
+  font-weight: 600;
+  color: var(--lud-ink-soft);
+  transition: border-color var(--lud-ease), background-color var(--lud-ease), color var(--lud-ease);
+}
+.lud-chip:hover {
+  border-color: var(--lud-green-300);
+  background: var(--lud-green-50);
+  color: var(--lud-green-700);
+}
+.lud-chip.is-active {
+  border-color: var(--lud-green-600);
+  background: var(--lud-green-600);
+  color: #fff;
+}
+/* les sous-rayons sont présentés par la colonne de gauche : plus de pastilles */
+.subcategory { display: none; }
+
+/* corps de liste : la grille respire directement sur le fond de page,
+   la carte blanche autour ajoutait un cadre de plus sans rien apporter */
+#products, .products-list-wrapper { background: none; border: none; box-shadow: none; padding: 0; }
+#js-product-list-footer { margin-top: var(--lud-s6); }
+.products-top {
+  display: block;
+  /* remontée au niveau du titre de rayon : la carte blanche qui portait
+     seulement « Trier par » laissait une bande vide en travers de la page */
+  margin: calc(-1 * var(--lud-s10)) 0 var(--lud-s5);
+  padding: 0;
+  background: none;
+  border: none;
+}
+@media (max-width: 767px) { .products-top { margin-top: 0; } }
+.products__selection {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--lud-s3);
+  margin: 0;
+  border: none;
+}
+.products__sort { display: flex; align-items: center; gap: var(--lud-s3); }
+.products__filter-button { min-height: 2.5rem; padding-inline: 1rem; }
+
+/* ---------------------------------------------------------------------
+   Fiche produit : bandeau de titre (étiquette, nom, prix)
+   --------------------------------------------------------------------- */
+/* ordre de lecture de la fiche : rayon, nom, référence, prix, description,
+   disponibilité, quantité, bouton. Le prix était calé à droite du titre, hors
+   du fil de lecture ; il est maintenant dans la colonne, juste sous le nom. */
+.product__heading {
+  display: block;
+  padding-bottom: var(--lud-s4);
+  border-bottom: 1px solid var(--lud-line);
+  margin-bottom: var(--lud-s4);
+}
+.product__heading-main { min-width: 0; }
+.product__heading .lud-tag { margin-bottom: var(--lud-s3); }
+.product__heading .product__name { margin-bottom: .4rem; }
+.product__ean { margin: 0; font-size: var(--lud-text-sm); color: var(--lud-ink-mute); }
+.product__heading .product__prices { margin: var(--lud-s4) 0 0; text-align: left; }
+.product__heading .product__prices-block { align-items: flex-start; }
+.product__description-short {
+  font-size: var(--lud-text-base);
+  line-height: 1.7;
+  color: var(--lud-ink-soft);
+  margin-bottom: var(--lud-s4);
+}
+.product__description-short p:last-child { margin-bottom: 0; }
+
+/* ---------------------------------------------------------------------
+   Réassurance de la fiche produit : grille de six mentions
+   --------------------------------------------------------------------- */
+.ludik-trust-product {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lud-s3) var(--lud-s6);
+  margin-top: var(--lud-s5);
+  padding: var(--lud-s4) var(--lud-s5);
+  background: var(--lud-surface-alt);
+  border-radius: var(--lud-r-md);
+}
+.ludik-trust-product__item { display: flex; align-items: center; gap: .7rem; }
+.ludik-trust-product__item .lud-i {
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke-width: 1.5;
+  color: var(--lud-green-500);
+}
+.ludik-trust-product__item span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  font-size: var(--lud-text-xs);
+  color: var(--lud-ink-soft);
+}
+.ludik-trust-product__item strong {
+  font-family: var(--lud-font-title);
+  font-size: var(--lud-text-sm);
+  font-weight: 700;
+  color: var(--lud-ink);
+}
+@media (max-width: 575px) { .ludik-trust-product { grid-template-columns: 1fr; } }
+
+/* galerie : vignettes en colonne à gauche, comme sur la maquette */
+@media (min-width: 768px) {
+  .product__images, .images-container {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: var(--lud-s3);
+    align-items: start;
+  }
+  .product__thumbnails, .js-qv-mask, .thumbnails {
+    display: flex !important;
+    flex-direction: column;
+    gap: .5rem;
+    max-height: 32rem;
+    overflow-y: auto;
+    order: -1;
+  }
+  .product__thumbnails img, .thumbnails img { width: 100%; height: auto; }
+  .product-cover, .product__cover { order: 1; }
+}
+
+/* une seule image : la colonne de vignettes ne réserve pas de place.
+   Le thème parent rend les vignettes en <button> dans une <ul>, pas en <li> :
+   c'est sur cet enfant unique qu'il faut tester, sinon une colonne vide de
+   88 px reste réservée avec une puce de liste orpheline. */
+@media (min-width: 768px) {
+  .product__images:has(.product__thumbnails-list > *:only-child),
+  .product__images:has(.js-qv-mask li:only-child),
+  .images-container:has(.thumbnails li:only-child) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .product__images:has(.product__thumbnails-list > *:only-child) .product__thumbnails,
+  .images-container:has(.thumbnails li:only-child) .thumbnails { display: none !important; }
+}
+.product__thumbnails-list { list-style: none; margin: 0; padding: 0; }
+/* les cadres de bas de fiche disparaissent quand ils n'ont pas de contenu */
+.product__bottom-right:not(:has(*)),
+.product__bottom-left:not(:has(*)) { display: none; }
+.product__bottom:not(:has(.product__bottom-right *)) { display: block; }
+
+/* ---------------------------------------------------------------------
+   Titres de page : même traitement partout (rayon, éditorial, compte)
+   --------------------------------------------------------------------- */
+#cms .page-header, .page-header { margin-bottom: var(--lud-s4); }
+h1.page-title, .page-header h1, #cms h1, .page-title-section {
+  font-size: clamp(1.45rem, 2.6vw, 1.95rem);
+  color: var(--lud-green-700);
+  margin-bottom: 0;
+}
+#cms .page-content { margin-top: var(--lud-s4); }
+#cms .page-content h2, .cms-page h2 { color: var(--lud-green-700); }
+
+/* pages de compte, panier, tunnel : même carte et même titre */
+#authentication .page-header h1, #identity .page-header h1,
+#history .page-header h1, #addresses .page-header h1,
+#cart .cart-grid h1, #order-confirmation h1, #contact h1, #stores h1,
+#sitemap h1, #best-sales h1, #new-products h1, #search h1 {
+  color: var(--lud-green-700);
+}
+#stores .store-item, #sitemap .sitemap-block, #contact .contact-form,
+#authentication .login-form, #identity form, .page-content--cart {
+  background: var(--lud-surface);
+  border: none;
+  border-radius: var(--lud-r-lg);
+  box-shadow: var(--lud-shadow-sm);
+  padding: clamp(var(--lud-s4), 2.2vw, var(--lud-s6));
+}
+#sitemap .sitemap-block ul { list-style: none; padding-left: 0; }
+#sitemap a { color: var(--lud-ink-soft); font-size: var(--lud-text-sm); }
+#sitemap a:hover { color: var(--lud-green-600); }
+
+/* =====================================================================
+   MOBILE - l'en-tête se réorganise, les grilles se resserrent
+   ===================================================================== */
+@media (max-width: 767px) {
+  /* rangée 1 : identité, compte, panier - rangée 2 : recherche pleine largeur */
+  .ludik-head__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--lud-s3) var(--lud-s3);
+    padding-block: var(--lud-s3);
+    min-height: 0;
+  }
+  .ludik-head__brand { order: 1; flex: 1 1 auto; gap: var(--lud-s2); }
+  .ludik-head__logo img { height: 54px; }
+
+  /* le compte et le panier de bureau sont vidés par le script du thème */
+  .ludik-head__actions { display: none !important; }
+  .ludik-head__search { order: 3; flex: 1 1 100%; display: block; }
+  .ludik-head__search .ludik-search-wrap { max-width: none; }
+  .ludik-head__search input[type="text"] { padding: .7rem .9rem; }
+  .ps-searchbar__go { width: 2.9rem; }
+
+  .ludik-head__mobile {
+    order: 2;
+    display: flex !important;
+    align-items: center;
+    gap: var(--lud-s3);
+    flex: 0 0 auto;
+  }
+  /* zone tactile de 44 px minimum, sur un en-tête clair */
+  .ludik-head__mobile .header-block__action-btn,
+  .ludik-head__mobile .ludik-head__action {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1.5px solid var(--lud-line-strong);
+    border-radius: var(--lud-r-pill);
+    color: var(--lud-green-700) !important;
+  }
+  .ludik-head__mobile .ludik-head__action-text,
+  .ludik-head__mobile .header-block__title { display: none !important; }
+  .ludik-head__mobile .lud-i, .ludik-head__mobile .material-icons {
+    width: 1.3rem;
+    height: 1.3rem;
+    font-size: 1.3rem;
+    border: none;
+    padding: 0;
+  }
+  .ludik-head__mobile .ludik-head__cart-icon { width: auto; height: auto; border: none; }
+  .ludik-head__mobile .header-block__badge,
+  .ludik-head__mobile .cart-products-count { top: -.25rem; right: -.3rem; }
+  /* la recherche prend toute la deuxième ligne */
+  .ludik-head__mobile-search { order: 3; flex: 1 1 100%; display: block !important; }
+  .ludik-head__mobile-search .ps-searchbar,
+  .ludik-head__mobile-search #_desktop_ps_searchbar,
+  .ludik-head__mobile-search .ludik-search-wrap { display: flex !important; width: 100%; max-width: none; }
+  .ludik-head__mobile-search .ps-searchbar__form {
+    display: flex;
+    width: 100%;
+    border: 1px solid var(--lud-line-strong);
+    border-radius: var(--lud-r-md);
+    overflow: hidden;
+  }
+  .ludik-head__mobile-search input[type="text"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: .7rem .9rem;
+    font-size: var(--lud-text-base);
+    color: var(--lud-ink);
+  }
+  .ludik-head__mobile-search .ps-searchbar__go { width: 2.9rem; }
+
+  /* la barre de rayons devient un bouton de menu. Le bouton mobile est en
+     dehors de .ludik-nav__inner, masqué sous 1200 px : c'est lui qui porte
+     la gouttière de page, sinon il touche le bord de l'écran. */
+  .ludik-nav { padding-block: var(--lud-s2); }
+  .ludik-nav__inner { padding-inline: var(--lud-gutter); }
+  .ludik-nav__all { margin: 0; font-size: var(--lud-text-base); padding: .55rem 1rem; }
+  .ps-mainmenu__mobile-toggle {
+    display: flex;
+    align-items: center;
+    padding-inline: var(--lud-gutter);
+  }
+
+  /* cartes de rayon : visuels sur une seule rangée serrée */
+  .ludik-univers .u-covers { padding: .55rem .55rem .2rem; gap: .25rem; }
+  .ludik-univers .u-body { padding: var(--lud-s3) var(--lud-s4) 0; }
+  .ludik-univers a { padding-bottom: 2.6rem; }
+  .ludik-univers .u-count { left: var(--lud-s4); bottom: var(--lud-s3); }
+  .ludik-univers .u-title { font-size: 1.05rem; }
+
+  /* sections : moins d'air vertical */
+  .ludik-section, .module-products { margin-block: var(--lud-s8); }
+  .ludik-home > * + * { margin-top: var(--lud-s8); }
+  .lud-section-head, .ludik-section-head { flex-direction: column; align-items: flex-start; gap: var(--lud-s2); }
+
+  /* fiche produit */
+  .product__container { padding: var(--lud-s4); }
+  .product__heading { border-bottom: none; padding-bottom: 0; }
+  .product__actions-qty-add { flex-wrap: wrap; }
+  .product__add-to-cart { flex: 1 1 100%; }
+
+  /* pied de page */
+  .footer__main { padding-top: var(--lud-s8); }
+  .ludik-foot { gap: var(--lud-s6); padding-bottom: var(--lud-s6); }
+  .ludik-foot__cols { grid-template-columns: 1fr; gap: var(--lud-s5); }
+}
+
+/* aucune page ne défile horizontalement */
+html, body { max-width: 100%; overflow-x: hidden; }
+
+

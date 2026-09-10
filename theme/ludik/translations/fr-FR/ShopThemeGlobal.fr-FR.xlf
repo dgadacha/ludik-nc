@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Compléments de traduction du thème Ludik.
+
+  Le catalogue français livré avec PrestaShop ne couvre pas quelques chaînes
+  récentes de Hummingbird, qui s'affichaient en anglais : le lien d'évitement,
+  les étiquettes de prix pour lecteurs d'écran, les contrôles de diaporama.
+  Un fichier de thème est la bonne place : il survit aux mises à jour du cœur.
+-->
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="Shop.Theme.Global.xlf" source-language="en" target-language="fr" datatype="plaintext">
+    <body>
+      <trans-unit id="cc367b544fab23df0ddaf982fb1445b5" approved="yes">
+        <source>Skip to main content</source>
+        <target state="final">Aller au contenu principal</target>
+        <note>Lien d'évitement du gabarit de page.</note>
+      </trans-unit>
+      <trans-unit id="7c491b68fcdc8169f7aadfffbafaf47d" approved="yes">
+        <source>Back to top</source>
+        <target state="final">Revenir en haut de page</target>
+        <note>Lien de retour en haut, accessible au clavier.</note>
+      </trans-unit>
+      <trans-unit id="50ea5f4c88eb1a54a250598b70680a5d" approved="yes">
+        <source>Carousel container</source>
+        <target state="final">Diaporama</target>
+        <note>Étiquette du conteneur de diaporama.</note>
+      </trans-unit>
+      <trans-unit id="b4a88417b3d0170d754c647c30b7216a" approved="yes">
+        <source>result</source>
+        <target state="final">article</target>
+        <note>Nombre d'articles d'une facette, au singulier.</note>
+      </trans-unit>
+      <trans-unit id="53e61336bb49ec978968786b07dea50b" approved="yes">
+        <source>results</source>
+        <target state="final">articles</target>
+        <note>Nombre d'articles d'une facette, au pluriel.</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

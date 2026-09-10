@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Compléments de traduction du thème Ludik.
+
+  Le catalogue français livré avec PrestaShop ne couvre pas quelques chaînes
+  récentes de Hummingbird, qui s'affichaient en anglais : le lien d'évitement,
+  les étiquettes de prix pour lecteurs d'écran, les contrôles de diaporama.
+  Un fichier de thème est la bonne place : il survit aux mises à jour du cœur.
+-->
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="Shop.Theme.Actions.xlf" source-language="en" target-language="fr" datatype="plaintext">
+    <body>
+      <trans-unit id="c91e4ee170226d66e90f99ba917e4c20" approved="yes">
+        <source>Quick view</source>
+        <target state="final">Aperçu rapide</target>
+        <note>Bouton d'aperçu sur la vignette produit.</note>
+      </trans-unit>
+      <trans-unit id="dd1f775e443ff3b9a89270713580a51b" approved="yes">
+        <source>Previous</source>
+        <target state="final">Précédent</target>
+        <note>Contrôle de diaporama.</note>
+      </trans-unit>
+      <trans-unit id="10ac3d04253ef7e1ddc73e6091c0cd55" approved="yes">
+        <source>Next</source>
+        <target state="final">Suivant</target>
+        <note>Contrôle de diaporama.</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

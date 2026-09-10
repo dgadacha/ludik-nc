@@ -1,0 +1,8 @@
+name: ludik
+parent: hummingbird
+display_name: Ludik.nc
+version: 1.0.0
+author:
+  name: "Tealforge"
+  email: "contact@tealforge.com"
+  url: "https://tealforge.com"

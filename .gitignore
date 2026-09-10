@@ -1,0 +1,38 @@
+# Assets du thème recopiés depuis Hummingbird (régénérables via scripts/06-theme-assets.sh)
+theme/ludik/assets/cache/
+theme/ludik/assets/js/
+theme/ludik/assets/img-dist/
+theme/ludik/assets/css/theme.css
+theme/ludik/assets/css/theme_rtl.css
+theme/ludik/assets/css/rtl.css
+theme/ludik/assets/css/error.css
+theme/ludik/assets/css/error_rtl.css
+theme/ludik/preview.png
+
+# Polices reprises du thème parent (les polices Ludik, elles, sont versionnées)
+theme/ludik/assets/fonts/inter-*
+theme/ludik/assets/fonts/Material*
+theme/ludik/assets/fonts/Vazirmatn*
+
+# Données de reprise : le catalogue brut et les 32 000 visuels de l'ancien site.
+# Ils se reconstituent avec tools/scrape/ puis les scripts d'import.
+import/img/
+import/products.json
+import/categories.json
+import/map-*.json
+
+# Visuels composés à partir des couvertures du catalogue : bannières de campagne
+# et fond de la bannière soirée. Ce sont des photos d'éditeurs, elles restent
+# hors dépôt et se régénèrent avec scripts/12-banners.sh.
+import/banners/
+theme/ludik/assets/img/soiree-jeux.jpg
+
+# photos fournies par le client : le mode d'emploi reste, pas les fichiers
+import/photos/*
+!import/photos/LISEZ-MOI.md
+import/boutiques/
+
+# sauvegarde locale avant refonte
+.rollback-*/
+
+.DS_Store

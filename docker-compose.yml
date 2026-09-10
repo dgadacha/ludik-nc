@@ -1,0 +1,83 @@
+services:
+  db:
+    image: mariadb:11.4
+    container_name: ludik-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ludikroot
+      MARIADB_DATABASE: ludik
+      MARIADB_USER: ludik
+      MARIADB_PASSWORD: ludik
+    command: >
+      --max_allowed_packet=256M
+      --innodb_buffer_pool_size=1G
+      --innodb_flush_log_at_trx_commit=2
+      --innodb_log_file_size=256M
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  prestashop:
+    image: prestashop/prestashop:9.1.5-8.3
+    container_name: ludik-ps
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_SERVER: db
+      DB_PORT: 3306
+      DB_NAME: ludik
+      DB_USER: ludik
+      DB_PASSWD: ludik
+      DB_PREFIX: ps_
+      PS_INSTALL_AUTO: 1
+      PS_ERASE_DB: 0
+      PS_DEV_MODE: 0
+      PS_DOMAIN: localhost:8801
+      PS_HANDLE_DYNAMIC_DOMAIN: 0
+      PS_FOLDER_ADMIN: admin-ludik
+      PS_FOLDER_INSTALL: install
+      PS_LANGUAGE: fr
+      PS_COUNTRY: nc
+      PS_SHOP_NAME: "Ludik.nc"
+      PS_SHOP_EMAIL: contact@ludik.nc
+      ADMIN_MAIL: admin@ludik.nc
+      ADMIN_PASSWD: LudikAdmin2026!
+      PS_ENABLE_SSL: 0
+      PHP_MEMORY_LIMIT: 1024M
+      PHP_MAX_EXECUTION_TIME: 600
+      PHP_UPLOAD_MAX_FILESIZE: 64M
+      PHP_POST_MAX_SIZE: 64M
+    volumes:
+      - ps_html:/var/www/html
+      - ./theme/ludik:/var/www/html/themes/ludik
+      - ./modules/ludikhome:/var/www/html/modules/ludikhome
+      - ./import:/import
+      - ./scripts:/scripts
+    ports:
+      - "8801:80"
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: ludik-pma
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_USER: ludik
+      PMA_PASSWORD: ludik
+      UPLOAD_LIMIT: 256M
+    ports:
+      - "8802:80"
+
+volumes:
+  db_data:
+  ps_html:
