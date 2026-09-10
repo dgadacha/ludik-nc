@@ -9,13 +9,10 @@ Le dépôt contient la recette complète : la pile Docker, les scripts de collec
 d'import, le thème et sa documentation. Les données de l'ancien site (catalogue et
 visuels) ne sont pas versionnées, elles se reconstituent avec les scripts.
 
-| | Ancien site | Cette refonte |
-|---|---|---|
-| Socle | PrestaShop 1.6 (fin de support en 2019) | PrestaShop 9.1.5, PHP 8.3 |
-| Catalogue | 32 939 références | les mêmes 32 939, réindexées |
-| Recherche | mots-clés seuls | index de recherche et filtres à facettes |
-| Mobile | non responsive | responsive, quatre paliers |
-| Thème | thème 1.6 d'origine | thème enfant sur Hummingbird |
+Ce qui est vérifiable sur le site en ligne au 10 septembre 2026 : il sert le thème
+`default-bootstrap`, celui livré par défaut avec PrestaShop 1.6, dont la branche n'est
+plus maintenue. La refonte tourne sur PrestaShop 9.1.5 en PHP 8.3, avec un thème écrit
+pour cette boutique.
 
 ## Prérequis
 
@@ -107,7 +104,10 @@ Compter environ 25 minutes pour les pages de catégories et 20 minutes pour les 
 
 - **32 939 produits** et **3 965 catégories** sur sept niveaux, avec prix, description
   courte, code EAN13 et visuel de couverture. 19 491 références en stock, 855 sans
-  visuel parce que l'ancien site n'en proposait pas.
+  visuel parce que le site en ligne n'en proposait pas.
+  La collecte s'appuie sur les pages de rayon, qui n'exposent pas la description longue :
+  27 623 produits ont une description courte, 267 une description longue. Récupérer les
+  fiches complètes demande de parcourir les 32 939 pages produit.
 - **Devise XPF** sans décimale, pays par défaut Nouvelle-Calédonie, taxes désactivées.
 - **Deux magasins** avec adresses, téléphones et horaires groupés, sur `/magasins`.
 - **Cinq modes de livraison** : retrait dans chacune des deux boutiques, retrait à la
@@ -133,7 +133,7 @@ modules/ludikhome/     blocs maison de la page d'accueil
 scripts/               installation, import et maintenance, montés sur /scripts
 tools/scrape/          collecte du catalogue de l'ancien site
 import/                données de reprise, hors dépôt
-docs/                  système de design, provenance des données, audit de l'ancien site
+docs/                  système de design, provenance des données, audit de la refonte
 ```
 
 ## Documentation
@@ -142,8 +142,8 @@ docs/                  système de design, provenance des données, audit de l'a
   ordre d'empilement et les pièges du thème parent.
 - `docs/DONNEES.md` : ce qui vient du site d'origine, ce qui a été ajouté pour faire
   tourner la boutique, et ce qui reste à valider avec le client.
-- `docs/AUDIT-PAGES.md` : relevé page par page de l'ancien site, à l'origine des choix
-  de la refonte.
+- `docs/AUDIT-PAGES.md` : relevé page par page de cette refonte, 24 pages parcourues à
+  1440 px et à 390 px, constats classés par gravité.
 
 ## Travailler sur le thème
 
