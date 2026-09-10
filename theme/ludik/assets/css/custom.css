@@ -1425,7 +1425,9 @@ svg.ludik-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 }
 @media (max-width: 575px) {
   .ludik-hero { padding-inline: var(--lud-s4); }
-  .ludik-hero__image { height: 15rem; }
+  /* 15 rem faisaient 240 px : le hero passait sous la taille d'une carte de
+     rayon et n'ouvrait plus la page. */
+  .ludik-hero__image { height: 20rem; }
   .ludik-hero__titre { font-size: 1.65rem; }
   .ludik-hero__accroche { font-size: var(--lud-text-base); }
 }
@@ -2200,55 +2202,6 @@ svg.ludik-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
   color: #fff;
 }
 
-/* ---------------------------------------------------------------------
-   5.9 Réassurance
-   --------------------------------------------------------------------- */
-.ludik-trust {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  background: var(--lud-surface);
-  border: 1px solid var(--lud-line);
-  border-radius: var(--lud-r-lg);
-  box-shadow: var(--lud-shadow-sm);
-  padding: var(--lud-s4) var(--lud-s3);
-  margin-top: var(--lud-s10);
-}
-.ludik-trust__item {
-  display: flex;
-  align-items: center;
-  gap: var(--lud-s3);
-  padding-inline: var(--lud-s5);
-  border-right: 1px solid var(--lud-line);
-}
-.ludik-trust__item:last-child { border-right: none; }
-.ludik-trust__item .lud-i {
-  width: 1.85rem;
-  height: 1.85rem;
-  stroke-width: 1.5;
-  color: var(--lud-green-500);
-}
-.ludik-trust__item span {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.35;
-  font-size: var(--lud-text-sm);
-  color: var(--lud-ink-soft);
-}
-.ludik-trust__item strong {
-  font-family: var(--lud-font-title);
-  font-size: var(--lud-text-base);
-  font-weight: 700;
-  color: var(--lud-ink);
-}
-@media (max-width: 991px) {
-  .ludik-trust { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--lud-s4) 0; }
-  .ludik-trust__item:nth-child(2n) { border-right: none; }
-}
-@media (max-width: 575px) {
-  .ludik-trust { grid-template-columns: 1fr; }
-  .ludik-trust__item { border-right: none; }
-}
-
 /* réassurance sur la fiche produit : grille compacte encadrée */
 .blockreassurance_product, #block-reassurance {
   background: var(--lud-surface-alt);
@@ -2360,8 +2313,9 @@ footer.footer > .footer__before { background: var(--lud-paper) !important; }
 }
 /* trois colonnes de liens et la lettre d'information, plus large */
 @media (min-width: 992px) { .ludik-foot__cols { grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.4fr); } }
+/* deux colonnes jusqu'en bas : les listes de liens sont courtes, empilées
+   elles allongeaient le pied de page de 400 px */
 @media (max-width: 767px)  { .ludik-foot__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 479px)  { .ludik-foot__cols { grid-template-columns: 1fr; } }
 /* blockwishlist s'accroche aussi au pied de page pour y ranger ses cinq boîtes
    de dialogue et son message temporaire. Ces conteneurs, vides à l'écran,
    occupaient chacun une case de la grille et repoussaient la lettre
@@ -2545,8 +2499,6 @@ footer.footer > .footer__before { background: var(--lud-paper) !important; }
   gap: var(--lud-s4);
 }
 @media (max-width: 1279px) { .ludik-univers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--lud-s5); } }
-@media (max-width: 767px)  { .ludik-univers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 479px)  { .ludik-univers { grid-template-columns: 1fr; } }
 .ludik-univers a {
   /* l'accent du rayon, redéfini plus bas par .u-* : sans modificateur, la
      carte reste dans le vert Ludik */
@@ -2649,6 +2601,27 @@ footer.footer > .footer__before { background: var(--lud-paper) !important; }
   transition: gap var(--lud-ease);
 }
 .ludik-univers a:hover .u-count { gap: .6rem; }
+
+/* Deux cartes par ligne jusqu'aux plus petits écrans. À une carte par ligne,
+   les six rayons occupaient 2 933 px, soit trois écrans et demi de téléphone
+   pour une seule section. Le visuel est raccourci en proportion, et la liste
+   des sous-rayons disparaît sur les cartes étroites : deux lignes de noms
+   tronqués sur 160 px de large n'aident personne, l'icône, le nom et le
+   nombre de produits suffisent. */
+@media (max-width: 767px) {
+  .ludik-univers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--lud-s4); }
+  .ludik-univers .u-covers { height: 9rem; }
+  .ludik-univers .u-body { gap: .35rem; padding: var(--lud-s3); }
+  .ludik-univers .u-count { padding-top: var(--lud-s2); }
+}
+@media (max-width: 479px) {
+  .ludik-univers { gap: var(--lud-s3); }
+  .ludik-univers .u-covers { height: 8rem; }
+  .ludik-univers .u-desc { display: none; }
+  .ludik-univers .u-head .lud-i { width: 1.05rem; height: 1.05rem; padding: .35rem; }
+  .ludik-univers .u-title { font-size: 1rem; }
+  .ludik-univers .u-count { font-size: var(--lud-text-xs); }
+}
 
 /* accents d'univers : une teinte de fond très légère et une couleur de lien */
 .ludik-univers a.u-societe { --u-accent: var(--lud-uni-societe); --u-fond: var(--lud-uni-societe-bg); }
@@ -2753,11 +2726,19 @@ footer.footer > .footer__before { background: var(--lud-paper) !important; }
 
 /* ---------------------------------------------------------------------
    Avantages - quatre cartes avant le pied de page
+   ---------------------------------------------------------------------
+   Une première version posait ces quatre mentions dans un seul bandeau bordé,
+   séparées par des filets. Elle a été remplacée par quatre cartes, mais ses
+   règles sont restées longtemps en place : le bandeau gardait son fond, sa
+   bordure et son ombre derrière les cartes, qui portent déjà les leurs. Une
+   carte dans une carte, et un empilement à une colonne sur téléphone que
+   personne n'avait demandé.
    --------------------------------------------------------------------- */
 .ludik-trust {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--lud-s4);
+  margin-top: var(--lud-s10);
 }
 .ludik-trust__item {
   display: flex;
@@ -2794,7 +2775,21 @@ footer.footer > .footer__before { background: var(--lud-paper) !important; }
   color: var(--lud-ink);
 }
 @media (max-width: 1199px) { .ludik-trust { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 575px)  { .ludik-trust { grid-template-columns: 1fr; } }
+/* deux par ligne jusqu'en bas : empilées, les quatre mentions prenaient
+   509 px pour quatre lignes de texte court */
+@media (max-width: 575px) {
+  .ludik-trust { gap: var(--lud-s3); }
+  /* pictogramme au-dessus du texte : à côté, il ne laissait que 90 px de
+     large et « Livraison OPT sous 24 h » se cassait sur trois lignes */
+  .ludik-trust__item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--lud-s2);
+    padding: var(--lud-s4) var(--lud-s3);
+  }
+  .ludik-trust__item span { font-size: var(--lud-text-xs); }
+  .ludik-trust__item .lud-i { width: 1.25rem; height: 1.25rem; padding: .45rem; }
+}
 
 /* ---------------------------------------------------------------------
    Cartes boutique - photo, coordonnées, horaires, itinéraire
@@ -2819,7 +2814,7 @@ footer.footer > .footer__before { background: var(--lud-paper) !important; }
 @media (max-width: 575px) { .ludik-shop { grid-template-columns: minmax(0, 1fr); } }
 .ludik-shop__photo { background: var(--lud-surface-alt); }
 .ludik-shop__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
-@media (max-width: 575px) { .ludik-shop__photo img { height: 10rem; } }
+@media (max-width: 575px) { .ludik-shop__photo img { height: 8rem; } }
 .ludik-shop__corps {
   display: flex;
   flex-direction: column;
@@ -3638,16 +3633,12 @@ h1.page-title, .page-header h1, #cms h1, .page-title-section {
     padding-inline: var(--lud-gutter);
   }
 
-  /* cartes de rayon : visuels sur une seule rangée serrée */
-  .ludik-univers .u-covers { padding: .55rem .55rem .2rem; gap: .25rem; }
-  .ludik-univers .u-body { padding: var(--lud-s3) var(--lud-s4) 0; }
-  .ludik-univers a { padding-bottom: 2.6rem; }
-  .ludik-univers .u-count { left: var(--lud-s4); bottom: var(--lud-s3); }
-  .ludik-univers .u-title { font-size: 1.05rem; }
-
-  /* sections : moins d'air vertical */
-  .ludik-section, .module-products { margin-block: var(--lud-s8); }
+  /* Rythme vertical : une seule source, comme sur grand écran. Les marges
+     posées ici sur les sections s'ajoutaient à la gouttière de la grille de
+     page : 32 px voulus, 96 à 104 px obtenus entre deux blocs. */
+  .page-content--home { gap: var(--lud-s8); }
   .ludik-home > * + * { margin-top: var(--lud-s8); }
+  .ludik-section, .module-products { margin-block: 0; }
   .lud-section-head, .ludik-section-head { flex-direction: column; align-items: flex-start; gap: var(--lud-s2); }
 
   /* fiche produit */
@@ -3659,7 +3650,7 @@ h1.page-title, .page-header h1, #cms h1, .page-title-section {
   /* pied de page */
   .footer__main { padding-top: var(--lud-s8); }
   .ludik-foot { gap: var(--lud-s6); padding-bottom: var(--lud-s6); }
-  .ludik-foot__cols { grid-template-columns: 1fr; gap: var(--lud-s5); }
+  .ludik-foot__cols { gap: var(--lud-s5) var(--lud-s4); }
 }
 
 /* aucune page ne défile horizontalement */

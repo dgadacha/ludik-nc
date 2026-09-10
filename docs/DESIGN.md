@@ -218,7 +218,7 @@ deux fichiers doivent rester identiques.
 
 | Palier | Largeur | Effet |
 |---|---|---|
-| Mobile | < 768 px | grille produits sur 2 colonnes, raccourcis en défilement, en-tête empilé, flèches du hero masquées, filtres en tiroir |
+| Mobile | < 768 px | grille produits sur 2 colonnes, cartes de rayon sur 2 colonnes au visuel raccourci et sans liste de sous-rayons, avantages sur 2 colonnes pictogramme au-dessus, pied de page sur 2 colonnes, raccourcis en défilement, en-tête empilé, flèches du hero masquées, filtres en tiroir |
 | Tablette | 768–1199 px | grille sur 3 colonnes, recherche sur sa propre ligne, libellés de compte masqués, filtres en tiroir |
 | Portable | 1200–1399 px | colonne de rayon visible, grille sur 4 colonnes |
 | Bureau | ≥ 1400 px | gabarit de référence, grille sur 5 colonnes en pleine largeur |
