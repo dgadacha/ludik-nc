@@ -524,9 +524,12 @@ def main():
         json.dump({
             'cleanUrls': True,
             'trailingSlash': False,
-            # les fichiers statiques passent avant les réécritures : seules les
-            # adresses sans page atterrissent sur le gabarit de rayon
-            'rewrites': [{'source': '/(.*)', 'destination': '/rayon.html'}],
+            # Les fichiers statiques passent avant les réécritures : seules les
+            # adresses sans page atterrissent sur le gabarit de rayon. La
+            # destination s'écrit sans extension : avec cleanUrls, Vercel
+            # expose « /rayon » et « /rayon.html » n'est plus qu'une
+            # redirection, donc une destination qui ne mène nulle part.
+            'rewrites': [{'source': '/(.*)', 'destination': '/rayon'}],
         }, fichier, indent=2)
 
     total = 0

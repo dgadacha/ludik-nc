@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/rayon.html"
+      "destination": "/rayon"
     }
   ]
 }
