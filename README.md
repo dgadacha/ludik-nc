@@ -91,6 +91,49 @@ docker exec ludik-ps sh -c 'for i in 0 1 2 3 4 5 6 7; do php /scripts/08-thumbna
 
 `02-import-products.php` reprend là où il s'est arrêté : il relit `import/map-products.json`.
 
+## Démo statique déployable
+
+`tools/demo/build-demo.py` aspire la boutique locale et produit un dossier
+`dist/` de fichiers statiques, à déposer sur n'importe quel hébergeur de
+fichiers. C'est ce qui permet de montrer la refonte par un lien, sans PHP ni
+base de données.
+
+```bash
+python3 tools/demo/build-demo.py            # dist/, environ 68 Mo
+python3 tools/demo/serve-demo.py            # contrôle sur http://localhost:8803
+npx vercel deploy --prod dist
+```
+
+Contenu : l'accueil, les six rayons avec leur première page de produits, 246
+fiches produit dont une sélection de licences (Pokémon, Naruto, One Piece,
+Magic, Lego, Dixit, Catan, Astérix, Cthulhu, Origami), les sept pages
+éditoriales, les magasins, le plan du site, la connexion et le panier.
+
+Ce qui reste cliquable, grâce à `tools/demo/demo.js` : la navigation, le tiroir
+des rayons, le diaporama de campagnes, les rangées défilantes, les suggestions
+de recherche, la page de résultats et l'ajout au panier avec son compteur et
+son message. La recherche et le panier travaillent sur `demo-index.json`, écrit
+à la fabrication, et le panier vit dans le navigateur du visiteur.
+
+Ce qui ne peut pas l'être, faute de serveur : les filtres à facettes, le tri,
+la pagination, le tunnel de commande, le compte client et le formulaire de
+contact. Ces commandes affichent un message au clic plutôt que de ne rien
+faire. Le module favoris interroge son API en GraphQL et se plaint dans la
+console du navigateur, sans conséquence à l'écran.
+
+Deux réglages tiennent la démo debout :
+
+- `vercel.json` active `cleanUrls`, qui sert `/4-jeux-de-societe` depuis
+  `4-jeux-de-societe.html`. Sans lui, les adresses sans extension seraient
+  téléchargées au lieu d'être affichées.
+- les liens vers les 3 965 catégories du catalogue, dont la démo ne reprend que
+  six, sont marqués à la fabrication et interceptés au clic. Le visiteur reste
+  dans la démo au lieu de tomber sur une page d'erreur.
+
+Pour une démo complète, filtres et commande comprises, il faut un serveur :
+tunnel Cloudflare depuis la machine de développement, ou un petit VPS avec le
+`docker-compose.yml` de ce dépôt.
+
 ## Recollecter le catalogue
 
 `import/` n'est pas versionné : 32 000 visuels et 16 Mo de JSON. Les scripts de collecte
@@ -133,6 +176,7 @@ theme/ludik/           thème enfant, monté dans le conteneur
 modules/ludikhome/     blocs maison de la page d'accueil
 scripts/               installation, import et maintenance, montés sur /scripts
 tools/scrape/          collecte du catalogue de l'ancien site
+tools/demo/            fabrication de la démo statique déployable
 import/                données de reprise, hors dépôt
 docs/                  système de design, provenance des données, audit de la refonte
 ```
