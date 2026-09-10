@@ -81,29 +81,75 @@
     return lirePanier().reduce(function (total, ligne) { return total + ligne.qte; }, 0);
   }
 
+  /* « 2 983 F » -> 2983 : les prix de la démo sont des libellés, pas des
+     nombres. On ne garde que les chiffres pour pouvoir les additionner. */
+  function centimes(prix) {
+    var chiffres = String(prix || '').replace(/[^0-9]/g, '');
+    return chiffres ? parseInt(chiffres, 10) : 0;
+  }
+
+  function formater(montant) {
+    return String(montant).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0') + '\u00a0F';
+  }
+
   function majCompteur() {
-    var total = quantiteTotale();
-    var compteurs = document.querySelectorAll('.cart-products-count');
-    Array.prototype.forEach.call(compteurs, function (compteur) {
+    var lignes = lirePanier();
+    var total = lignes.reduce(function (n, l) { return n + l.qte; }, 0);
+    var montant = lignes.reduce(function (n, l) { return n + centimes(l.prix) * l.qte; }, 0);
+
+    Array.prototype.forEach.call(document.querySelectorAll('.cart-products-count'), function (compteur) {
       compteur.textContent = String(total);
+    });
+    /* le montant du panier vit à côté du libellé, dans l'en-tête */
+    Array.prototype.forEach.call(document.querySelectorAll('.blockcart .ludik-head__action-text em'), function (noeud) {
+      noeud.textContent = formater(montant);
     });
   }
 
-  function ajouterAuPanier(url) {
-    var article = (catalogue || []).filter(function (a) { return a.url === url; })[0];
+  /**
+   * Ce qu'on sait de l'article ajouté.
+   *
+   * L'index de la démo ne couvre que les fiches des pages de rayon et des
+   * licences : un produit ajouté depuis une rangée de l'accueil n'y figure
+   * pas, et le panier affichait « Article » sans prix. La page a pourtant
+   * tout sous la main, dans la vignette ou dans la fiche : on la lit d'abord,
+   * l'index ne sert plus que de secours.
+   */
+  function decrire(url, origine) {
+    var texte = function (selecteurs) {
+      for (var i = 0; i < selecteurs.length; i += 1) {
+        var noeud = origine ? origine.querySelector(selecteurs[i]) : null;
+        if (!noeud) {
+          noeud = document.querySelector(selecteurs[i]);
+        }
+        if (noeud && noeud.textContent.trim()) {
+          return noeud.textContent.trim();
+        }
+      }
+      return '';
+    };
+
+    var image = (origine && origine.querySelector('img')) || document.querySelector('.product__cover img, .product-cover img');
+    var connu = (catalogue || []).filter(function (a) { return a.url === url; })[0] || {};
+
+    return {
+      url: url,
+      nom: texte(['.product-miniature__title', 'h1']) || connu.nom || 'Article',
+      prix: texte(['.product-miniature__price', '.product__price']) || connu.prix || '',
+      visuel: (image && image.getAttribute('src')) || connu.visuel || ''
+    };
+  }
+
+  function ajouterAuPanier(url, origine) {
     var lignes = lirePanier();
     var existante = lignes.filter(function (l) { return l.url === url; })[0];
 
     if (existante) {
       existante.qte += 1;
     } else {
-      lignes.push({
-        url: url,
-        nom: article ? article.nom : 'Article',
-        prix: article ? article.prix : '',
-        visuel: article ? article.visuel : '',
-        qte: 1
-      });
+      var fiche = decrire(url, origine);
+      fiche.qte = 1;
+      lignes.push(fiche);
     }
 
     ecrirePanier(lignes);
@@ -346,6 +392,27 @@
       });
     });
 
+    /* Les filtres à facettes ne fonctionnent pas sans serveur, et leurs
+       nombres portent sur le catalogue complet. On garde les intitulés, qui
+       montrent ce que fait la vraie boutique, et on retire les nombres. */
+    Array.prototype.forEach.call(document.querySelectorAll('.search-filters__magnitude'), function (noeud) {
+      noeud.remove();
+    });
+
+    /* Bas de liste : « Affichage 1-24 de 28 113 article(s) » et la pagination
+       sur 1 172 pages. La démo n'a qu'une page par rayon. */
+    var nombre = comptes[window.location.pathname.replace(/\.html$/, '')];
+    var affiches = document.querySelectorAll('.product-miniature').length;
+    var visible = nombre === undefined ? affiches : nombre;
+    var bas = document.querySelector('.pagination__number');
+    if (bas && visible) {
+      bas.textContent = 'Affichage 1-' + visible + ' de ' + visible + ' article(s)';
+    }
+    var pages = document.querySelector('.pagination__nav');
+    if (pages) {
+      pages.remove();
+    }
+
     /* en-tête d'une page de rayon */
     var chemin = window.location.pathname.replace(/\.html$/, '');
     var ici = comptes[chemin];
@@ -375,14 +442,17 @@
       return '<li class="demo-panier__ligne">' +
         (ligne.visuel ? '<img src="' + ligne.visuel + '" alt="" width="64" height="64">' : '') +
         '<a href="' + ligne.url + '">' + ligne.nom + '</a>' +
-        '<span>' + ligne.qte + ' x ' + ligne.prix + '</span></li>';
+        '<span>' + ligne.qte + ' x ' + (ligne.prix || '') + '</span></li>';
     }).join('');
 
     zone.innerHTML =
       '<div class="lud-card lud-card--pad">' +
       '<h1 class="page-title">Votre panier</h1>' +
       (lignes.length
-        ? '<ul class="demo-panier">' + corps + '</ul>'
+        ? '<ul class="demo-panier">' + corps + '</ul>' +
+          '<p class="demo-total">Total : <strong>' +
+          formater(lignes.reduce(function (n, l) { return n + centimes(l.prix) * l.qte; }, 0)) +
+          '</strong></p>'
         : '<p>Votre panier est vide.</p>') +
       '<p class="demo-note">Le tunnel de commande demande le serveur de la boutique. ' +
       'Dans cette démo statique, le panier vit dans votre navigateur.</p>' +
@@ -392,6 +462,7 @@
       '.demo-panier__ligne{display:flex;align-items:center;gap:1rem;padding:.75rem;' +
       'border-radius:.875rem;background:var(--lud-surface-alt)}' +
       '.demo-panier__ligne span{margin-left:auto;font-weight:700}' +
+      '.demo-total{margin:1rem 0 0;text-align:right;font-size:1.05rem}' +
       '.demo-note{margin:1.5rem 0 0;color:var(--lud-ink-soft);font-size:.875rem}' +
       '</style>';
   }
@@ -433,7 +504,7 @@
       var cible = lien ? lien.getAttribute('href') : window.location.pathname;
 
       chargerCatalogue().then(function () {
-        ajouterAuPanier(cible.replace(/\.html$/, '.html'));
+        ajouterAuPanier(cible, vignette);
       });
 
       if (formulaire) {
