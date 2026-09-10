@@ -199,10 +199,25 @@ class Aspirateur:
         """Rend les liens relatifs à la racine et coupe ce qui ne peut pas vivre."""
         texte = html.decode('utf-8', 'replace')
 
-        # les URL absolues de la boutique locale deviennent relatives à la racine
-        texte = texte.replace(self.base, '')
-        texte = texte.replace(self.base.replace('http://', '//'), '')
-        texte = texte.replace(self.base.replace('http:', ''), '')
+        # Les URL absolues de la boutique locale deviennent relatives à la
+        # racine. Quatre écritures cohabitent dans une page PrestaShop, et
+        # l'oubli d'une seule renvoyait le visiteur sur localhost :
+        #  - la forme normale, dans les attributs href et src ;
+        #  - la forme sans protocole, dans les gabarits du thème parent ;
+        #  - la forme échappée, dans le JSON de configuration inséré en ligne,
+        #    d'où l'adresse du panier que lit le script d'ajout ;
+        #  - la forme encodée, dans les paramètres « back » des liens de
+        #    connexion.
+        hote = self.base.split('//', 1)[1]
+        for ecriture in (
+            self.base,
+            '//' + hote,
+            self.base.replace('/', '\\/'),
+            '\\/\\/' + hote,
+            urllib.parse.quote(self.base, safe=''),
+            urllib.parse.quote('//' + hote, safe=''),
+        ):
+            texte = texte.replace(ecriture, '')
 
         # La rangée « dans le même rayon » des fiches produit pèse 35 Ko et
         # dix vignettes par page, tirées au hasard dans le rayon : la plupart
