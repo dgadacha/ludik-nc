@@ -1175,7 +1175,6 @@ svg.ludik-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 }
 .ludik-menu-mobile__sous a:hover { background: var(--lud-green-50); color: var(--lud-green-700); }
 .ludik-menu-mobile__tout { font-weight: 600; color: var(--lud-green-600) !important; }
-.ludik-nav .ps-mainmenu__mobile-toggle .menu-toggle { color: var(--lud-green-800); }
 
 /* ---------------------------------------------------------------------
    5.3 Fil d'Ariane
@@ -2610,15 +2609,22 @@ footer.footer > .footer__before { background: var(--lud-paper) !important; }
    nombre de produits suffisent. */
 @media (max-width: 767px) {
   .ludik-univers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--lud-s4); }
-  .ludik-univers .u-covers { height: 9rem; }
+  /* Zone d'image en proportion de la carte et non en hauteur fixe. Les
+     packshots du catalogue sont carrés, produit centré sur blanc : dans une
+     zone plus large que haute, le recadrage garde une bande horizontale et
+     une couverture étroite comme un tome de manga se retrouvait minuscule
+     entre deux marges blanches. */
+  .ludik-univers .u-covers { height: auto; aspect-ratio: 4 / 3; }
   .ludik-univers .u-body { gap: .35rem; padding: var(--lud-s3); }
   .ludik-univers .u-count { padding-top: var(--lud-s2); }
 }
 @media (max-width: 479px) {
   .ludik-univers { gap: var(--lud-s3); }
-  .ludik-univers .u-covers { height: 8rem; }
+  /* sur deux colonnes de téléphone, la carte fait 160 px : une zone carrée
+     accueille le packshot sans le rogner du tout */
+  .ludik-univers .u-covers { aspect-ratio: 1 / 1; }
   .ludik-univers .u-desc { display: none; }
-  .ludik-univers .u-head .lud-i { width: 1.05rem; height: 1.05rem; padding: .35rem; }
+  .ludik-univers .u-head .lud-i { width: 1.15rem; height: 1.15rem; padding: .4rem; }
   .ludik-univers .u-title { font-size: 1rem; }
   .ludik-univers .u-count { font-size: var(--lud-text-xs); }
 }
@@ -3573,7 +3579,10 @@ h1.page-title, .page-header h1, #cms h1, .page-title-section {
     gap: var(--lud-s3);
     flex: 0 0 auto;
   }
-  /* zone tactile de 44 px minimum, sur un en-tête clair */
+  /* Zone tactile de 44 px minimum, sur un en-tête clair. Sans le retrait de la
+     marge intérieure et de l'écart, ces boutons gardaient ceux de la version
+     bureau, calculés pour une icône suivie d'un libellé sur deux lignes : dans
+     un carré de 44 px, l'icône se retrouvait décalée vers la gauche. */
   .ludik-head__mobile .header-block__action-btn,
   .ludik-head__mobile .ludik-head__action {
     position: relative;
@@ -3582,9 +3591,19 @@ h1.page-title, .page-header h1, #cms h1, .page-title-section {
     justify-content: center;
     width: 2.75rem;
     height: 2.75rem;
+    padding: 0;
+    gap: 0;
     border: 1.5px solid var(--lud-line-strong);
     border-radius: var(--lud-r-pill);
     color: var(--lud-green-700) !important;
+  }
+  /* le pictogramme porte un disque vert sur grand écran, où il accompagne un
+     libellé. Seul dans un bouton rond, il dessinait un cercle dans un cercle. */
+  .ludik-head__mobile .ludik-head__action > .lud-i,
+  .ludik-head__mobile .ludik-head__cart-icon {
+    background: none;
+    box-shadow: none;
+    color: var(--lud-green-700);
   }
   .ludik-head__mobile .ludik-head__action-text,
   .ludik-head__mobile .header-block__title { display: none !important; }
