@@ -129,14 +129,21 @@
       return '';
     };
 
-    var image = (origine && origine.querySelector('img')) || document.querySelector('.product__cover img, .product-cover img');
+    var image = (origine && origine.querySelector('img'))
+      || document.querySelector('.js-qv-product-cover, .product__images img');
     var connu = (catalogue || []).filter(function (a) { return a.url === url; })[0] || {};
+
+    /* Le prix de la fiche porte un intitulé « Prix : » réservé aux lecteurs
+       d'écran, et le panier affichait « 1 x Prix : 958 F ». On ne garde que le
+       montant, repéré sur sa forme : des chiffres, des espaces, puis le franc. */
+    var brut = texte(['.product-miniature__price', '.product__price']) || connu.prix || '';
+    var montant = brut.match(/(\d[\d\s\u00a0]*)\s*F/);
 
     return {
       url: url,
       nom: texte(['.product-miniature__title', 'h1']) || connu.nom || 'Article',
-      prix: texte(['.product-miniature__price', '.product__price']) || connu.prix || '',
-      visuel: (image && image.getAttribute('src')) || connu.visuel || ''
+      prix: montant ? montant[1].trim() + '\u00a0F' : brut.trim(),
+      visuel: (image && (image.getAttribute('src') || '')) || connu.visuel || ''
     };
   }
 
@@ -440,9 +447,10 @@
     var lignes = lirePanier();
     var corps = lignes.map(function (ligne) {
       return '<li class="demo-panier__ligne">' +
-        (ligne.visuel ? '<img src="' + ligne.visuel + '" alt="" width="64" height="64">' : '') +
+        (ligne.visuel ? '<img src="' + ligne.visuel + '" alt="" width="56" height="56">' : '') +
         '<a href="' + ligne.url + '">' + ligne.nom + '</a>' +
-        '<span>' + ligne.qte + ' x ' + (ligne.prix || '') + '</span></li>';
+        '<span class="demo-panier__qte">' + ligne.qte + '</span>' +
+        '<span class="demo-panier__prix">' + (ligne.prix || '') + '</span></li>';
     }).join('');
 
     zone.innerHTML =
@@ -461,7 +469,12 @@
       '.demo-panier{list-style:none;margin:1.5rem 0 0;padding:0;display:grid;gap:.75rem}' +
       '.demo-panier__ligne{display:flex;align-items:center;gap:1rem;padding:.75rem;' +
       'border-radius:.875rem;background:var(--lud-surface-alt)}' +
-      '.demo-panier__ligne span{margin-left:auto;font-weight:700}' +
+      '.demo-panier__ligne img{flex:0 0 auto;width:56px;height:56px;object-fit:contain;' +
+      'background:var(--lud-surface);border-radius:.5rem}' +
+      '.demo-panier__ligne a{flex:1 1 auto;min-width:0}' +
+      '.demo-panier__qte{flex:0 0 auto;color:var(--lud-ink-soft)}' +
+      '.demo-panier__qte::before{content:"x "}' +
+      '.demo-panier__prix{flex:0 0 auto;font-weight:700;min-width:5.5rem;text-align:right}' +
       '.demo-total{margin:1rem 0 0;text-align:right;font-size:1.05rem}' +
       '.demo-note{margin:1.5rem 0 0;color:var(--lud-ink-soft);font-size:.875rem}' +
       '</style>';
