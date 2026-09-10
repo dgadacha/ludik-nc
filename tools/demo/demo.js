@@ -517,7 +517,13 @@
       } else if (evenement.target.closest('.js-increment-button')) {
         lignes[index].qte += 1;
       } else if (evenement.target.closest('.js-decrement-button')) {
-        lignes[index].qte = Math.max(1, lignes[index].qte - 1);
+        /* comme sur la boutique : descendre sous un retire l'article, la
+           quantité n'affiche jamais zéro */
+        if (lignes[index].qte <= 1) {
+          lignes.splice(index, 1);
+        } else {
+          lignes[index].qte -= 1;
+        }
       } else {
         return;
       }
@@ -593,17 +599,10 @@
     majRecap(lignes);
     brancherPanier(liste);
 
-    /* le mot sur la démo, une seule fois, sous la liste */
-    if (!document.querySelector('.demo-note')) {
-      var note = document.createElement('p');
-      note.className = 'demo-note';
-      note.textContent = 'Le tunnel de commande demande le serveur de la boutique. '
-        + 'Dans cette démo, le panier vit dans votre navigateur.';
-      liste.parentNode.appendChild(note);
-
+    if (!document.querySelector('#demo-panier-style')) {
       var style = document.createElement('style');
-      style.textContent = '.demo-note{margin:1.5rem 0 0;color:var(--lud-ink-soft);font-size:.875rem}'
-        + '.demo-vide{margin:1.5rem 0;color:var(--lud-ink-soft)}';
+      style.id = 'demo-panier-style';
+      style.textContent = '.demo-vide{margin:1.5rem 0;color:var(--lud-ink-soft)}';
       document.head.appendChild(style);
     }
   }
