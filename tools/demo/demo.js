@@ -186,25 +186,99 @@
 
     ecrirePanier(lignes);
     majCompteur();
+    signaler('Article ajouté au panier.');
+    pulserCompteur();
+  }
 
-    /* le thème affiche lui-même le message de confirmation et fait pulser le
-       compteur : on lui envoie l'événement qu'il attend */
-    if (window.prestashop && typeof window.prestashop.emit === 'function') {
-      window.prestashop.emit('updateCart', { reason: { linkAction: 'add-to-cart' }, resp: {} });
+  /**
+   * Le message de confirmation, avec le gabarit du thème.
+   *
+   * Le thème sait déjà l'afficher, sur l'événement updateCart de PrestaShop.
+   * La démo ne s'appuie plus dessus : rien ne garantit que son écouteur soit
+   * en place, et un message qui n'apparaît pas fait douter de l'ajout. Même
+   * gabarit, mêmes classes, même durée : à l'écran c'est le même message.
+   */
+  var DUREE_MESSAGE = 5000;
+
+  function signaler(texte, lien) {
+    var conteneur = document.getElementById('js-toast-container');
+    var modele = conteneur && conteneur.querySelector('.js-toast-template');
+    if (!conteneur || !modele) {
+      return;
     }
+
+    var toast = modele.content.cloneNode(true).querySelector('.toast');
+    var corps = toast && toast.querySelector('.toast-body');
+    if (!toast || !corps) {
+      return;
+    }
+
+    toast.classList.add('fade', 'lud-toast', 'lud-toast--succes');
+    corps.textContent = texte;
+
+    var urls = (window.prestashop && window.prestashop.urls) || {};
+    var versPanier = lien || (urls.pages && urls.pages.cart) || '/panier';
+    var a = document.createElement('a');
+    a.className = 'lud-toast__lien';
+    a.href = versPanier;
+    a.textContent = 'Voir le panier';
+    corps.appendChild(a);
+
+    var retirer = function () {
+      toast.classList.remove('show');
+      window.setTimeout(function () {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    };
+
+    var fermer = toast.querySelector('.btn-close');
+    if (fermer) {
+      fermer.classList.remove('d-none');
+      fermer.addEventListener('click', retirer);
+    }
+
+    conteneur.appendChild(toast);
+    /* une image de rendu sépare l'insertion de l'ajout de .show, sans quoi la
+       transition d'opacité n'a pas de point de départ */
+    window.requestAnimationFrame(function () { toast.classList.add('show'); });
+    window.setTimeout(retirer, DUREE_MESSAGE);
+  }
+
+  function pulserCompteur() {
+    var pastilles = document.querySelectorAll('.cart-products-count, .header-block__badge');
+    Array.prototype.forEach.call(pastilles, function (pastille) {
+      pastille.classList.remove('lud-pulse');
+      void pastille.offsetWidth;
+      pastille.classList.add('lud-pulse');
+    });
   }
 
   /* ------------------------------------------------- message d'indisponible */
 
-  function signaler(texte) {
-    if (window.prestashop && typeof window.prestashop.emit === 'function') {
-      window.prestashop.emit('handleError', { resp: { errors: [texte] } });
+  var INDISPONIBLE = 'Cette fonction demande le serveur de la boutique : elle n\'est pas active dans la démo statique.';
+
+  function prevenir(texte) {
+    var conteneur = document.getElementById('js-toast-container');
+    var modele = conteneur && conteneur.querySelector('.js-toast-template');
+    if (!conteneur || !modele) {
+      window.alert(texte);
       return;
     }
-    window.alert(texte);
+    var toast = modele.content.cloneNode(true).querySelector('.toast');
+    var corps = toast.querySelector('.toast-body');
+    toast.classList.add('fade', 'lud-toast', 'lud-toast--erreur');
+    corps.textContent = texte;
+    var fermer = toast.querySelector('.btn-close');
+    if (fermer) {
+      fermer.classList.remove('d-none');
+      fermer.addEventListener('click', function () { toast.remove(); });
+    }
+    conteneur.appendChild(toast);
+    window.requestAnimationFrame(function () { toast.classList.add('show'); });
+    window.setTimeout(function () { toast.remove(); }, 6000);
   }
-
-  var INDISPONIBLE = 'Cette fonction demande le serveur de la boutique : elle n\'est pas active dans la démo statique.';
 
   /* ---------------------------------------------------- interception réseau */
 
@@ -254,7 +328,7 @@
 
       /* facettes, tri, pagination */
       if (url.indexOf('from-xhr') !== -1 || url.indexOf('ajax=1') !== -1 || url.indexOf('q=') !== -1) {
-        signaler(INDISPONIBLE);
+        prevenir(INDISPONIBLE);
         return reponseJson({});
       }
 
@@ -765,7 +839,7 @@
       );
       if (cible) {
         evenement.preventDefault();
-        signaler(INDISPONIBLE);
+        prevenir(INDISPONIBLE);
       }
     });
   }
