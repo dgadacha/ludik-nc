@@ -326,6 +326,19 @@ class Aspirateur:
         for chemin in editoriales:
             self.aspirer_page(chemin)
 
+        # Toute page de la démo qui cite une fiche doit y mener : les rangées
+        # de l'accueil, « Nouveautés » et « Meilleures ventes » en citent, et
+        # leurs liens tombaient sur la page de repli faute d'avoir été
+        # aspirés. On repasse donc sur tout ce qui est déjà en mémoire.
+        cites = []
+        for html in self.pages_html.values():
+            for chemin in self.liens_produits(html):
+                if chemin not in produits and chemin not in cites:
+                    cites.append(chemin)
+        if cites:
+            print('  %s fiches citées par les pages déjà aspirées' % len(cites))
+            produits.extend(cites)
+
         produits = produits[:self.limite_produits]
         print('Fiches produit : %s' % len(produits))
         for index, chemin in enumerate(produits, 1):
@@ -492,7 +505,7 @@ Aspirateur.modele_carte = _modele_carte
 def main():
     analyse = argparse.ArgumentParser(description=__doc__)
     analyse.add_argument('--base', default='http://localhost:8801')
-    analyse.add_argument('--produits', type=int, default=260)
+    analyse.add_argument('--produits', type=int, default=320)
     arguments = analyse.parse_args()
 
     aspirateur = Aspirateur(arguments.base, arguments.produits)
