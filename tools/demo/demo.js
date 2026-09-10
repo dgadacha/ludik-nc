@@ -21,6 +21,7 @@
   var catalogue = null;
   var modeleCarte = '';
   var rayons = {};
+  var comptes = {};
 
   /* ------------------------------------------------------------ catalogue */
 
@@ -34,6 +35,7 @@
         catalogue = donnees.articles || [];
         modeleCarte = donnees.modele || '';
         rayons = donnees.rayons || {};
+        comptes = donnees.comptes || {};
         return catalogue;
       })
       .catch(function () { catalogue = []; return catalogue; });
@@ -312,6 +314,52 @@
     });
   }
 
+  /* ---------------------------------------------------------- compteurs */
+
+  /**
+   * Aligne les compteurs sur ce que la démo contient réellement.
+   *
+   * Les pages sont aspirées telles quelles : leurs compteurs sont ceux de la
+   * boutique complète. Une carte qui annonce 3 536 produits et mène à
+   * vingt-quatre se contredit toute seule.
+   *
+   * Les nombres de sous-rayons, eux, restent : l'arborescence est réelle et
+   * chaque sous-rayon a bien une page dans la démo.
+   */
+  function ajusterCompteurs() {
+    /* cartes de rayon de l'accueil */
+    Array.prototype.forEach.call(document.querySelectorAll('.ludik-univers a[href]'), function (carteRayon) {
+      var chemin = carteRayon.getAttribute('href').split('?')[0];
+      var nombre = comptes[chemin];
+      if (nombre === undefined) {
+        return;
+      }
+      var compteur = carteRayon.querySelector('.u-count');
+      if (!compteur) {
+        return;
+      }
+      /* le libellé est le premier noeud de texte, la flèche suit en SVG */
+      Array.prototype.forEach.call(compteur.childNodes, function (noeud) {
+        if (noeud.nodeType === 3 && noeud.textContent.trim()) {
+          noeud.textContent = ' ' + nombre + ' produits ';
+        }
+      });
+    });
+
+    /* en-tête d'une page de rayon */
+    var chemin = window.location.pathname.replace(/\.html$/, '');
+    var ici = comptes[chemin];
+    if (ici !== undefined) {
+      var entete = document.querySelector('.category__count');
+      if (entete) {
+        var fort = entete.querySelector('strong');
+        if (fort) {
+          fort.textContent = String(ici);
+        }
+      }
+    }
+  }
+
   /* -------------------------------------------------------- page panier */
 
   function rendrePanier() {
@@ -352,7 +400,7 @@
 
   function demarrer() {
     majCompteur();
-    chargerCatalogue();
+    chargerCatalogue().then(ajusterCompteurs);
 
     var chemin = window.location.pathname.replace(/\.html$/, '');
 

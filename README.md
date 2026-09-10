@@ -109,6 +109,10 @@ fiches produit dont une sélection de licences (Pokémon, Naruto, One Piece,
 Magic, Lego, Dixit, Catan, Astérix, Cthulhu, Origami), les sept pages
 éditoriales, les magasins, le plan du site, la connexion et le panier.
 
+Les compteurs sont recalculés sur ce que la démo contient : une carte de rayon
+annonce 24 produits et en montre 24. Les nombres de sous-rayons, eux, restent
+ceux du catalogue : l'arborescence est réelle et chaque sous-rayon a sa page.
+
 Ce qui reste cliquable, grâce à `tools/demo/demo.js` : la navigation, le tiroir
 des rayons, le diaporama de campagnes, les rangées défilantes, les suggestions
 de recherche, la page de résultats et l'ajout au panier avec son compteur et

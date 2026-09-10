@@ -42,7 +42,11 @@ def par_classe(nom):
 RACINE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SORTIE = os.path.join(RACINE, 'dist')
 
-# Les six rayons de la boutique, dans l'ordre du menu.
+# Les six rayons, en secours seulement : les adresses réelles se lisent sur les
+# cartes de l'accueil. Deux d'entre elles ne portent pas le nom qu'on devine
+# (« /5-cartes-a-collectionner », pas « /5-jeux-de-cartes-a-collectionner »),
+# et une adresse devinée renvoie la bonne page mais crée un fichier que les
+# liens du site ne visent pas.
 RAYONS = [
     '/4-jeux-de-societe',
     '/5-jeux-de-cartes-a-collectionner',
@@ -54,7 +58,6 @@ RAYONS = [
 
 # Pages sans produits, reprises telles quelles.
 PAGES = [
-    '/',
     '/magasins',
     '/plan-site',
     '/nous-contacter',
@@ -82,6 +85,7 @@ class Aspirateur:
         self.base = base.rstrip('/')
         self.limite_produits = limite_produits
         self.vus = set()
+        self.rayons = list(RAYONS)
         self.pages_html = {}      # chemin d'URL -> HTML, pages enregistrées
         self.pages_source = {}    # pages lues pour l'index seulement
         self.fichiers = 0
@@ -246,9 +250,24 @@ class Aspirateur:
             shutil.rmtree(SORTIE)
         os.makedirs(SORTIE)
 
+        print('Accueil')
+        accueil = self.aspirer_page('/')
+        self.rayons = list(RAYONS)
+        if accueil:
+            arbre = lxml.html.fromstring(accueil)
+            trouves = []
+            for lien in arbre.xpath(par_classe('ludik-univers') + '//a[@href]'):
+                chemin = urllib.parse.urlparse(
+                    (lien.get('href') or '').replace(self.base, '')).path
+                if chemin and chemin not in trouves:
+                    trouves.append(chemin)
+            if len(trouves) >= 4:
+                self.rayons = trouves
+        print('  %s rayons : %s' % (len(self.rayons), ', '.join(self.rayons)))
+
         print('Pages de rayon')
         produits = []
-        for rayon in RAYONS:
+        for rayon in self.rayons:
             html = self.aspirer_page(rayon)
             if html:
                 trouves = self.liens_produits(html)
@@ -320,7 +339,7 @@ class Aspirateur:
         # sous-rayons : c'est ce qui permet de savoir de quel rayon dépend
         # « Stratégie & Réflexion », et donc de garnir sa page avec des jeux de
         # société plutôt qu'avec des pots de peinture.
-        for chemin_rayon in RAYONS:
+        for chemin_rayon in self.rayons:
             html = self.pages_html.get(chemin_rayon)
             if not html:
                 continue
@@ -377,7 +396,8 @@ class Aspirateur:
         articles = []
         vus = set()
 
-        sources = [(self.pages_html.get(chemin), None) for chemin in RAYONS]
+        self.comptes = {}
+        sources = [(self.pages_html.get(chemin), None) for chemin in self.rayons]
         sources += [(html, '') for html in self.pages_source.values()]
 
         for html, etiquette in sources:
@@ -389,6 +409,7 @@ class Aspirateur:
                 rayon = titres[0].text_content().strip() if titres else ''
             else:
                 rayon = etiquette
+            avant = len(articles)
 
             for vignette in arbre.xpath(par_classe('product-miniature')):
                 liens = vignette.xpath('.//a[@href]/@href')
@@ -419,6 +440,15 @@ class Aspirateur:
                     'visuel': urllib.parse.urlparse(visuel.replace(self.base, '')).path,
                     'rayon': rayon,
                 })
+
+            # Les compteurs de la démo : une carte de rayon qui annonce 3 536
+            # produits et n'en montre que vingt-quatre se contredit toute
+            # seule. demo.js les remplace par ce que la démo contient.
+            if etiquette is None:
+                for chemin_rayon in self.rayons:
+                    if self.pages_html.get(chemin_rayon) is html:
+                        self.comptes[chemin_rayon] = len(articles) - avant
+
         return articles
 
 
@@ -429,7 +459,7 @@ def _modele_carte(self):
     de réécrire à la main le balisage de la vignette, au risque qu'il s'écarte
     de celui du thème, on en prélève une et on remplace son contenu.
     """
-    for chemin in RAYONS:
+    for chemin in self.rayons:
         html = self.pages_html.get(chemin)
         if not html:
             continue
@@ -458,6 +488,7 @@ def main():
         'articles': index,
         'modele': aspirateur.modele_carte(),
         'rayons': aspirateur.rayons_cites,
+        'comptes': aspirateur.comptes,
     }
     with open(os.path.join(SORTIE, 'demo-index.json'), 'w', encoding='utf-8') as fichier:
         json.dump(donnees, fichier, ensure_ascii=False, separators=(',', ':'))
