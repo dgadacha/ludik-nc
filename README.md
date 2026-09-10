@@ -132,9 +132,20 @@ ceux du catalogue : l'arborescence est réelle et chaque sous-rayon a sa page.
 
 Ce qui reste cliquable, grâce à `tools/demo/demo.js` : la navigation, le tiroir
 des rayons, le diaporama de campagnes, les rangées défilantes, les suggestions
-de recherche, la page de résultats et l'ajout au panier avec son compteur et
-son message. La recherche et le panier travaillent sur `demo-index.json`, écrit
-à la fabrication, et le panier vit dans le navigateur du visiteur.
+de recherche, la page de résultats, l'ajout au panier avec son compteur et son
+message, la page panier avec ses lignes, son sélecteur de quantité, son lien
+« Retirer » et son récapitulatif, la rangée « Vous aimerez aussi » et les
+articles récemment consultés. Tout cela travaille sur `demo-index.json`, écrit
+à la fabrication ; le panier et l'historique vivent dans le navigateur du
+visiteur.
+
+Deux détails de fabrication rendent cela possible. La page panier est aspirée
+**garnie** : PrestaShop ne rend le balisage d'une ligne que si le panier en
+contient une, alors le script ouvre une session, y ajoute deux articles et
+enregistre la page. Et la rangée « Vous aimerez aussi » est conservée mais
+vidée de ses cartes : elle citait dix produits tirés dans tout le rayon, ce qui
+pesait dix vignettes par fiche pour des liens qui ne menaient pas tous quelque
+part.
 
 Ce qui ne peut pas l'être, faute de serveur : les filtres à facettes, le tri,
 la pagination, le tunnel de commande, le compte client et le formulaire de

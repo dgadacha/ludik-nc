@@ -22,6 +22,7 @@ Usage :
 """
 
 import argparse
+import http.cookiejar
 import json
 import os
 import re
@@ -64,10 +65,14 @@ PAGES = [
     '/nouveaux-produits',
     '/meilleures-ventes',
     '/recherche',
-    '/panier',
     '/connexion',
     '/inscription',
 ]
+
+# Le panier s'aspire garni : la page vide ne contient pas le balisage d'une
+# ligne, et demo.js n'aurait rien à recopier pour afficher le panier du
+# visiteur. Deux fiches de la démo suffisent, leurs visuels sont déjà là.
+PANIER_GARNI = 2
 
 # Licences que l'on cherche en premier dans une démo. La boutique locale les
 # trouve elle-même : on relit ses pages de résultats pour savoir quelles fiches
@@ -219,12 +224,21 @@ class Aspirateur:
         ):
             texte = texte.replace(ecriture, '')
 
-        # La rangée « dans le même rayon » des fiches produit pèse 35 Ko et
-        # dix vignettes par page, tirées au hasard dans le rayon : la plupart
-        # de ces fiches ne sont pas dans la démo, les liens tomberaient sur la
-        # page 404. Elle sort de la démo, pas de la boutique.
+        # La rangée « dans le même rayon » d'une fiche produit cite dix
+        # produits tirés dans tout le rayon : 35 Ko et dix vignettes par page,
+        # pour des fiches qui ne sont pas toutes dans la démo. On garde la
+        # section, son titre et sa rangée, et on vide ses cartes : demo.js la
+        # remplit avec des produits de la démo, dont les liens mènent quelque
+        # part. La section sert aussi de gabarit aux articles consultés, que
+        # PrestaShop ne rend qu'avec une session de navigation.
+        def vider_rangee(trouve):
+            # le gabarit ouvre la balise sur plusieurs lignes : « <article »
+            # puis « class="product-miniature ... » à la ligne suivante
+            return re.sub(r'<article\s+class="product-miniature.*?</article>', '',
+                          trouve.group(0), flags=re.DOTALL)
+
         texte = re.sub(
-            r'<section class="ps-categoryproducts".*?</section>', '', texte,
+            r'<section class="ps-categoryproducts".*?</section>', vider_rangee, texte,
             flags=re.DOTALL
         )
 
@@ -311,6 +325,8 @@ class Aspirateur:
         print('Pages sans produits')
         for page in PAGES:
             self.aspirer_page(page)
+
+        self.aspirer_panier(produits[:PANIER_GARNI])
 
         # Les pages éditoriales : plutôt que de les lister ici, on relève les
         # liens /content/ de l'accueil et du pied de page. Si le client en
@@ -410,6 +426,61 @@ class Aspirateur:
 
         return produits
 
+    # ------------------------------------------------------------------ panier
+
+    def aspirer_panier(self, fiches):
+        """Aspire la page panier avec des lignes dedans.
+
+        PrestaShop ne rend le balisage d'une ligne que si le panier en contient
+        une. On ouvre donc une session à cookies, on y ajoute deux articles,
+        puis on enregistre la page : demo.js recopiera cette ligne autant de
+        fois qu'il y a d'articles dans le panier du visiteur, et effacera les
+        lignes du modèle.
+        """
+        print('Panier garni')
+        jar = http.cookiejar.CookieJar()
+        session = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+        session.addheaders = [('User-Agent', 'ludik-demo-builder')]
+
+        try:
+            accueil = session.open(self.base + '/', timeout=30).read().decode('utf-8', 'replace')
+        except Exception as erreur:  # noqa: BLE001
+            print('  session impossible : %s' % erreur)
+            return
+
+        jeton = re.search(r'"static_token":"([^"]+)"', accueil)
+        if not jeton:
+            print('  jeton introuvable, panier laissé vide')
+            return
+        jeton = jeton.group(1)
+
+        ajoutes = 0
+        for chemin in fiches:
+            identifiant = re.match(r'^/(\d+)-', chemin)
+            if not identifiant:
+                continue
+            adresse = (
+                '%s/panier?add=1&id_product=%s&id_product_attribute=0&qty=1&token=%s'
+                % (self.base, identifiant.group(1), jeton)
+            )
+            try:
+                session.open(adresse, timeout=30).read()
+                ajoutes += 1
+            except Exception as erreur:  # noqa: BLE001
+                print('  ajout %s : %s' % (identifiant.group(1), erreur))
+
+        try:
+            page = session.open(self.base + '/panier?action=show', timeout=30).read()
+        except Exception as erreur:  # noqa: BLE001
+            print('  page panier : %s' % erreur)
+            return
+
+        lignes = page.decode('utf-8', 'replace').count('js-cart-item')
+        print('  %s article(s) ajouté(s), %s ligne(s) dans la page' % (ajoutes, lignes))
+        if lignes:
+            self.vus.add('/panier')
+            self.pages_html['/panier'] = page
+
     # ------------------------------------------------------------------ index
 
     def index_produits(self, produits):
@@ -477,7 +548,71 @@ class Aspirateur:
                     if self.pages_html.get(chemin_rayon) is html:
                         self.comptes[chemin_rayon] = len(articles) - avant
 
+        # Les fiches que ni un rayon ni une licence ne citait, celles des
+        # rangées de l'accueil par exemple, se lisent sur leur propre page.
+        # L'index couvre ainsi toutes les fiches de la démo : la recherche les
+        # trouve, et le panier y repêche une couverture manquante.
+        connus = {article['url'] for article in articles}
+        for chemin in produits:
+            if chemin in connus:
+                continue
+            html = self.pages_html.get(chemin)
+            if not html:
+                continue
+            arbre = lxml.html.fromstring(html)
+
+            titres = arbre.xpath('//h1')
+            if not titres:
+                continue
+
+            prix = ''
+            blocs = arbre.xpath(par_classe('product__price'))
+            if blocs:
+                trouve = re.search(r'(\d[\d\s\u00a0]*)\s*F', blocs[0].text_content())
+                if trouve:
+                    prix = trouve.group(1).strip() + '\u00a0F'
+
+            visuel = ''
+            for noeud in arbre.xpath('//img[@src]'):
+                source = noeud.get('src') or ''
+                if 'product_main' in source or 'default_xl' in source or '-large_default/' in source:
+                    visuel = urllib.parse.urlparse(source.replace(self.base, '')).path
+                    break
+
+            articles.append({
+                'nom': titres[0].text_content().strip(),
+                'url': chemin,
+                'prix': prix,
+                'visuel': visuel,
+                'rayon': '',
+            })
+
         return articles
+
+
+def _modele_rangee(self):
+    """Une rangée de produits vidée, prélevée sur une fiche.
+
+    Le module « Vous aimerez aussi » ne s'affiche pas sur toutes les fiches :
+    un produit seul dans son sous-rayon n'a personne à côté de lui. Les
+    articles consultés, eux, doivent pouvoir apparaître partout. On garde donc
+    une rangée en réserve, que demo.js insère là où il n'y en a pas à cloner.
+    """
+    for chemin, html in self.pages_html.items():
+        if not chemin.endswith('.html'):
+            continue
+        texte = html.decode('utf-8', 'replace') if isinstance(html, bytes) else html
+        debut = texte.find('<section class="ps-categoryproducts"')
+        if debut == -1:
+            continue
+        fin = texte.find('</section>', debut)
+        if fin == -1:
+            continue
+        return texte[debut:fin + len('</section>')]
+    return ''
+
+
+Aspirateur.modele_rangee = _modele_rangee
 
 
 def _modele_carte(self):
@@ -515,6 +650,7 @@ def main():
     donnees = {
         'articles': index,
         'modele': aspirateur.modele_carte(),
+        'rangee': aspirateur.modele_rangee(),
         'rayons': aspirateur.rayons_cites,
         'comptes': aspirateur.comptes,
     }

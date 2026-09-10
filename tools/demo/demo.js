@@ -20,6 +20,7 @@
   var CLE_PANIER = 'ludik-demo-panier';
   var catalogue = null;
   var modeleCarte = '';
+  var modeleRangee = '';
   var rayons = {};
   var comptes = {};
 
@@ -34,6 +35,7 @@
       .then(function (donnees) {
         catalogue = donnees.articles || [];
         modeleCarte = donnees.modele || '';
+        modeleRangee = donnees.rangee || '';
         rayons = donnees.rayons || {};
         comptes = donnees.comptes || {};
         return catalogue;
@@ -61,9 +63,32 @@
 
   /* ------------------------------------------------------------- panier */
 
+  /**
+   * Répare une ligne écrite par une version antérieure de la démo.
+   *
+   * Le panier vit dans le navigateur du visiteur : il survit aux
+   * redéploiements et garde les défauts du jour où il a été rempli, comme
+   * l'intitulé « Prix : » dans le montant ou l'absence de couverture. On le
+   * répare à la lecture, plutôt que de le vider : personne ne perd son panier
+   * parce qu'on a corrigé la démo.
+   */
+  function reparer(ligne) {
+    var montant = String(ligne.prix || '').match(/(\d[\d\s\u00a0]*)\s*F/);
+    if (montant) {
+      ligne.prix = montant[1].trim() + '\u00a0F';
+    }
+    if (!ligne.visuel) {
+      var connu = (catalogue || []).filter(function (a) { return a.url === ligne.url; })[0];
+      if (connu && connu.visuel) {
+        ligne.visuel = connu.visuel;
+      }
+    }
+    return ligne;
+  }
+
   function lirePanier() {
     try {
-      return JSON.parse(window.localStorage.getItem(CLE_PANIER)) || [];
+      return (JSON.parse(window.localStorage.getItem(CLE_PANIER)) || []).map(reparer);
     } catch (erreur) {
       return [];
     }
@@ -436,55 +461,258 @@
 
   /* -------------------------------------------------------- page panier */
 
-  function rendrePanier() {
-    /* la grille du panier vit dans la colonne centrale : c'est elle qu'on
-       remplace, sinon le panier de la démo s'ajoute au panier vide du serveur */
-    var grille = document.querySelector('.cart-grid');
-    var zone = grille ? grille.parentElement : document.querySelector('#center-column');
-    if (!zone) {
+  /**
+   * La page panier du thème, garnie avec le panier du visiteur.
+   *
+   * PrestaShop ne rend le balisage d'une ligne que si le panier en contient
+   * une : le script de fabrication aspire donc une page panier garnie de deux
+   * articles. On y prend la première ligne comme gabarit, on la recopie autant
+   * de fois qu'il y a d'articles, et on met le récapitulatif à jour. Le
+   * sélecteur de quantité et le lien « Retirer » sont rebranchés sur le
+   * navigateur.
+   */
+  function majRecap(lignes) {
+    var articles = lignes.reduce(function (n, l) { return n + l.qte; }, 0);
+    var montant = lignes.reduce(function (n, l) { return n + centimes(l.prix) * l.qte; }, 0);
+
+    var sous = document.querySelector('#cart-subtotal-products');
+    if (sous) {
+      var intitule = sous.querySelector('.js-subtotal');
+      if (intitule) {
+        intitule.textContent = articles + (articles > 1 ? ' articles' : ' article');
+      }
+      var valeur = sous.querySelector('.cart-summary__value');
+      if (valeur) {
+        valeur.textContent = formater(montant);
+      }
+    }
+
+    var total = document.querySelector('.cart-summary__total .cart-summary__value');
+    if (total) {
+      total.textContent = formater(montant);
+    }
+  }
+
+  var panierBranche = false;
+
+  function brancherPanier(liste) {
+    if (panierBranche) {
       return;
     }
-    var lignes = lirePanier();
-    var corps = lignes.map(function (ligne) {
-      return '<li class="demo-panier__ligne">' +
-        (ligne.visuel ? '<img src="' + ligne.visuel + '" alt="" width="56" height="56">' : '') +
-        '<a href="' + ligne.url + '">' + ligne.nom + '</a>' +
-        '<span class="demo-panier__qte">' + ligne.qte + '</span>' +
-        '<span class="demo-panier__prix">' + (ligne.prix || '') + '</span></li>';
-    }).join('');
+    panierBranche = true;
 
-    zone.innerHTML =
-      '<div class="lud-card lud-card--pad">' +
-      '<h1 class="page-title">Votre panier</h1>' +
-      (lignes.length
-        ? '<ul class="demo-panier">' + corps + '</ul>' +
-          '<p class="demo-total">Total : <strong>' +
-          formater(lignes.reduce(function (n, l) { return n + centimes(l.prix) * l.qte; }, 0)) +
-          '</strong></p>'
-        : '<p>Votre panier est vide.</p>') +
-      '<p class="demo-note">Le tunnel de commande demande le serveur de la boutique. ' +
-      'Dans cette démo statique, le panier vit dans votre navigateur.</p>' +
-      '</div>' +
-      '<style>' +
-      '.demo-panier{list-style:none;margin:1.5rem 0 0;padding:0;display:grid;gap:.75rem}' +
-      '.demo-panier__ligne{display:flex;align-items:center;gap:1rem;padding:.75rem;' +
-      'border-radius:.875rem;background:var(--lud-surface-alt)}' +
-      '.demo-panier__ligne img{flex:0 0 auto;width:56px;height:56px;object-fit:contain;' +
-      'background:var(--lud-surface);border-radius:.5rem}' +
-      '.demo-panier__ligne a{flex:1 1 auto;min-width:0}' +
-      '.demo-panier__qte{flex:0 0 auto;color:var(--lud-ink-soft)}' +
-      '.demo-panier__qte::before{content:"x "}' +
-      '.demo-panier__prix{flex:0 0 auto;font-weight:700;min-width:5.5rem;text-align:right}' +
-      '.demo-total{margin:1rem 0 0;text-align:right;font-size:1.05rem}' +
-      '.demo-note{margin:1.5rem 0 0;color:var(--lud-ink-soft);font-size:.875rem}' +
-      '</style>';
+    liste.addEventListener('click', function (evenement) {
+      var item = evenement.target.closest('.js-cart-item');
+      if (!item || item.dataset.demoIndex === undefined) {
+        return;
+      }
+      var index = parseInt(item.dataset.demoIndex, 10);
+      var lignes = lirePanier();
+      if (!lignes[index]) {
+        return;
+      }
+
+      if (evenement.target.closest('.js-remove-from-cart')) {
+        lignes.splice(index, 1);
+      } else if (evenement.target.closest('.js-increment-button')) {
+        lignes[index].qte += 1;
+      } else if (evenement.target.closest('.js-decrement-button')) {
+        lignes[index].qte = Math.max(1, lignes[index].qte - 1);
+      } else {
+        return;
+      }
+
+      evenement.preventDefault();
+      evenement.stopPropagation();
+      ecrirePanier(lignes);
+      majCompteur();
+      rendrePanier();
+    }, true);
+  }
+
+  function rendrePanier() {
+    var liste = document.querySelector('.js-cart-list');
+    if (!liste) {
+      return;
+    }
+    var gabarit = liste.querySelector('.js-cart-item');
+    if (!gabarit) {
+      return;
+    }
+    if (!liste.dataset.demoGabarit) {
+      liste.dataset.demoGabarit = gabarit.outerHTML;
+    }
+
+    var lignes = lirePanier();
+    /* les réparations de lecture sont réécrites, pour ne les faire qu'une fois */
+    ecrirePanier(lignes);
+
+    liste.innerHTML = '';
+    lignes.forEach(function (ligne, index) {
+      var bac = document.createElement('div');
+      bac.innerHTML = liste.dataset.demoGabarit;
+      var item = bac.firstElementChild;
+      item.dataset.demoIndex = String(index);
+
+      Array.prototype.forEach.call(item.querySelectorAll('a.product-line__title'), function (lien) {
+        lien.setAttribute('href', ligne.url);
+      });
+      var image = item.querySelector('img');
+      if (image) {
+        image.removeAttribute('srcset');
+        image.setAttribute('src', ligne.visuel || '');
+        image.setAttribute('alt', ligne.nom);
+        image.setAttribute('title', ligne.nom);
+      }
+      var titre = item.querySelector('.product-line__content-left a.product-line__title');
+      if (titre) {
+        titre.textContent = ligne.nom;
+      }
+      var unitaire = item.querySelector('.product-line__item-price');
+      if (unitaire) {
+        unitaire.textContent = ligne.prix;
+      }
+      var champ = item.querySelector('.js-cart-line-product-quantity');
+      if (champ) {
+        champ.value = String(ligne.qte);
+        /* sans serveur à interroger, le champ ne doit pas tenter sa requête */
+        champ.removeAttribute('data-update-url');
+        champ.setAttribute('readonly', 'readonly');
+      }
+      var ligneTotal = item.querySelector('.product-line__price');
+      if (ligneTotal) {
+        ligneTotal.textContent = formater(centimes(ligne.prix) * ligne.qte);
+      }
+      liste.appendChild(item);
+    });
+
+    if (!lignes.length) {
+      liste.innerHTML = '<p class="demo-vide">Il n\'y a plus d\'articles dans votre panier.</p>';
+    }
+
+    majRecap(lignes);
+    brancherPanier(liste);
+
+    /* le mot sur la démo, une seule fois, sous la liste */
+    if (!document.querySelector('.demo-note')) {
+      var note = document.createElement('p');
+      note.className = 'demo-note';
+      note.textContent = 'Le tunnel de commande demande le serveur de la boutique. '
+        + 'Dans cette démo, le panier vit dans votre navigateur.';
+      liste.parentNode.appendChild(note);
+
+      var style = document.createElement('style');
+      style.textContent = '.demo-note{margin:1.5rem 0 0;color:var(--lud-ink-soft);font-size:.875rem}'
+        + '.demo-vide{margin:1.5rem 0;color:var(--lud-ink-soft)}';
+      document.head.appendChild(style);
+    }
+  }
+
+  /* --------------------------------- rangées de la fiche produit */
+
+  var CLE_VUS = 'ludik-demo-vus';
+
+  function lireVus() {
+    try {
+      return JSON.parse(window.localStorage.getItem(CLE_VUS)) || [];
+    } catch (erreur) {
+      return [];
+    }
+  }
+
+  function memoriserVue(url) {
+    var vus = lireVus().filter(function (u) { return u !== url; });
+    vus.unshift(url);
+    try {
+      window.localStorage.setItem(CLE_VUS, JSON.stringify(vus.slice(0, 12)));
+    } catch (erreur) {
+      /* navigation privée : l'historique ne survit pas, tant pis */
+    }
+  }
+
+  /**
+   * Remplit « Vous aimerez aussi » et ajoute « Récemment consultés ».
+   *
+   * Le script de fabrication garde la section du thème mais vide ses cartes :
+   * elles citaient dix produits tirés dans tout le rayon, dont la plupart ne
+   * sont pas dans la démo. On la remplit avec des produits du même rayon qui,
+   * eux, ont bien une fiche ici. La deuxième rangée n'existe pas dans les
+   * pages aspirées, PrestaShop ne la rendant qu'avec une session de
+   * navigation : on clone la première et on la garnit de l'historique du
+   * visiteur.
+   */
+  function rendreRangees(chemin) {
+    var section = document.querySelector('.ps-categoryproducts');
+    var courant = catalogue.filter(function (a) { return a.url === chemin; })[0];
+
+    /* « Vous aimerez aussi » n'existe que si le thème l'a rendu : un produit
+       seul dans son sous-rayon n'a personne à côté de lui, ici comme sur la
+       boutique. On ne l'invente pas. */
+    if (section) {
+      var grille = section.querySelector('.products');
+      if (grille) {
+        var autres = catalogue.filter(function (a) { return a.url !== chemin; });
+        var memes = autres;
+        if (courant && courant.rayon) {
+          var duRayon = autres.filter(function (a) { return a.rayon === courant.rayon; });
+          if (duRayon.length >= 4) {
+            memes = duRayon;
+          }
+        }
+        grille.innerHTML = memes.slice(0, 5).map(carte).join('');
+      }
+    }
+
+    var vus = lireVus()
+      .filter(function (u) { return u !== chemin; })
+      .map(function (u) { return catalogue.filter(function (a) { return a.url === u; })[0]; })
+      .filter(Boolean);
+
+    if (vus.length) {
+      var clone = null;
+      if (section) {
+        clone = section.cloneNode(true);
+      } else if (modeleRangee) {
+        /* pas de rangée sur cette fiche : on prend celle mise en réserve */
+        var bac = document.createElement('div');
+        bac.innerHTML = modeleRangee;
+        clone = bac.firstElementChild;
+      }
+      if (clone) {
+        var titre = clone.querySelector('h2');
+        if (titre) {
+          titre.textContent = 'Récemment consultés';
+        }
+        var sous = clone.querySelector('.ludik-section-head p');
+        if (sous) {
+          sous.textContent = 'Les fiches que vous venez d\'ouvrir.';
+        }
+        var dedans = clone.querySelector('.products');
+        if (dedans) {
+          dedans.innerHTML = vus.slice(0, 5).map(carte).join('');
+        }
+        if (section) {
+          section.parentNode.insertBefore(clone, section.nextSibling);
+        } else {
+          var colonne = document.querySelector('#center-column');
+          if (colonne) {
+            colonne.appendChild(clone);
+          }
+        }
+      }
+    }
+
+    memoriserVue(chemin);
   }
 
   /* ------------------------------------------------------------ démarrage */
 
   function demarrer() {
     majCompteur();
-    chargerCatalogue().then(ajusterCompteurs);
+    chargerCatalogue().then(function () {
+      ajusterCompteurs();
+      majCompteur();
+    });
 
     var chemin = window.location.pathname.replace(/\.html$/, '');
 
@@ -496,7 +724,11 @@
       rendreResultats();
     }
     if (chemin === '/panier') {
-      rendrePanier();
+      /* le catalogue sert à repêcher les couvertures manquantes */
+      chargerCatalogue().then(rendrePanier);
+    }
+    if (/\.html$/.test(window.location.pathname)) {
+      chargerCatalogue().then(function () { rendreRangees(window.location.pathname); });
     }
 
     /* Ajout au panier : capturé au clic, avant que le thème ne tente sa
@@ -530,7 +762,7 @@
     document.addEventListener('click', function (evenement) {
       var cible = evenement.target.closest(
         '.js-search-link, .js-pager-link, .js-search-filters-clear-all, ' +
-        '[data-ps-action="add-voucher"], .checkout .btn-primary'
+        '[data-ps-action="add-voucher"], .cart-summary__actions a, .checkout .btn-primary'
       );
       if (cible) {
         evenement.preventDefault();
