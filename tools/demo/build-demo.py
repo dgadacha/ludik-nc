@@ -299,6 +299,46 @@ class Aspirateur:
                 print('  %s / %s' % (index, len(produits)))
             self.aspirer_page(chemin)
 
+        print('Rayons cités hors démo')
+        self.rayons_cites = {}
+        motif = re.compile(r'^/\d+-[a-z0-9-]+$')
+
+        def relever(arbre, parent, racine='//a[@href]'):
+            for lien in arbre.xpath(racine):
+                chemin = urllib.parse.urlparse(
+                    (lien.get('href') or '').replace(self.base, '')).path
+                if not motif.match(chemin) or chemin in self.pages_html:
+                    continue
+                libelle = lien.text_content().strip()
+                if not libelle:
+                    continue
+                fiche = self.rayons_cites.setdefault(chemin, {'nom': libelle})
+                if parent:
+                    fiche['parent'] = parent
+
+        # La colonne de gauche d'une page de rayon ne liste que ses propres
+        # sous-rayons : c'est ce qui permet de savoir de quel rayon dépend
+        # « Stratégie & Réflexion », et donc de garnir sa page avec des jeux de
+        # société plutôt qu'avec des pots de peinture.
+        for chemin_rayon in RAYONS:
+            html = self.pages_html.get(chemin_rayon)
+            if not html:
+                continue
+            arbre = lxml.html.fromstring(html)
+            titres = arbre.xpath('//h1')
+            nom_rayon = titres[0].text_content().strip() if titres else ''
+            colonne = arbre.xpath('//*[@id="left-column"]')
+            if colonne and nom_rayon:
+                relever(colonne[0], nom_rayon, './/a[@href]')
+
+        # le reste du catalogue, cité par le tiroir des rayons et le plan du site
+        for html in self.pages_html.values():
+            relever(lxml.html.fromstring(html), None)
+
+        avec_parent = sum(1 for f in self.rayons_cites.values() if 'parent' in f)
+        print('  %s rayons, dont %s rattachés à un rayon de la démo'
+              % (len(self.rayons_cites), avec_parent))
+
         print('Nettoyage des pages')
         for chemin in list(self.pages_html):
             self.pages_html[chemin] = self.nettoyer_html(self.pages_html[chemin])
@@ -316,22 +356,6 @@ class Aspirateur:
             if index % 100 == 0:
                 print('  %s / %s' % (index, len(uniques)))
             self.aspirer_ressource(chemin)
-
-        print('Page 404')
-        contenu, mime = self.recuperer('/demo-hors-perimetre', accepter_404=True)
-        if contenu is not None and mime == 'text/html':
-            texte = self.nettoyer_html(contenu).decode('utf-8', 'replace')
-            texte = texte.replace(
-                'La page demandée n\'existe pas ou n\'existe plus.',
-                'Cette page ne fait pas partie de la démo. Elle ne reprend qu\'une partie '
-                'du catalogue : les six rayons, leurs premières pages de produits et '
-                'quelques licences. Le reste vit dans la boutique complète.'
-            )
-            destination = os.path.join(SORTIE, '404.html')
-            with open(destination, 'w', encoding='utf-8') as fichier:
-                fichier.write(texte)
-            self.fichiers += 1
-            print('  404.html écrite')
 
         print('Écriture des pages')
         for chemin, html in self.pages_html.items():
@@ -420,49 +444,6 @@ def _modele_carte(self):
 Aspirateur.modele_carte = _modele_carte
 
 
-def marquer_liens_absents():
-    """Marque les liens qui ne mènent nulle part dans la démo.
-
-    Le tiroir des catégories et les colonnes de rayon citent les 3 965
-    catégories du catalogue ; la démo n'en reprend que six. Plutôt que
-    d'envoyer le visiteur sur une page d'erreur à chaque essai, ces liens
-    reçoivent un attribut que demo.js intercepte pour afficher un message.
-    """
-    pages = set()
-    for dossier, _, fichiers in os.walk(SORTIE):
-        for nom in fichiers:
-            chemin = os.path.join(dossier, nom)[len(SORTIE):]
-            pages.add(chemin)
-            if chemin.endswith('.html'):
-                pages.add(chemin[:-5])
-            if chemin == '/index.html':
-                pages.add('/')
-
-    marques = 0
-    lien = re.compile(r'<a\s([^>]*?)href="(/[^"]*)"')
-
-    def remplacer(trouve):
-        avant, cible = trouve.group(1), trouve.group(2)
-        chemin = cible.split('?')[0].split('#')[0]
-        if chemin in pages or not chemin.startswith('/'):
-            return trouve.group(0)
-        return '<a %sdata-demo-absent="1" href="%s"' % (avant, cible)
-
-    for dossier, _, fichiers in os.walk(SORTIE):
-        for nom in fichiers:
-            if not nom.endswith('.html'):
-                continue
-            chemin = os.path.join(dossier, nom)
-            with open(chemin, encoding='utf-8') as fichier:
-                texte = fichier.read()
-            nouveau, nombre = lien.subn(remplacer, texte)
-            if nombre and 'data-demo-absent' in nouveau:
-                marques += nouveau.count('data-demo-absent')
-                with open(chemin, 'w', encoding='utf-8') as fichier:
-                    fichier.write(nouveau)
-    return marques
-
-
 def main():
     analyse = argparse.ArgumentParser(description=__doc__)
     analyse.add_argument('--base', default='http://localhost:8801')
@@ -473,7 +454,11 @@ def main():
     produits = aspirateur.construire()
 
     index = aspirateur.index_produits(produits)
-    donnees = {'articles': index, 'modele': aspirateur.modele_carte()}
+    donnees = {
+        'articles': index,
+        'modele': aspirateur.modele_carte(),
+        'rayons': aspirateur.rayons_cites,
+    }
     with open(os.path.join(SORTIE, 'demo-index.json'), 'w', encoding='utf-8') as fichier:
         json.dump(donnees, fichier, ensure_ascii=False, separators=(',', ':'))
     print('Index de recherche : %s articles' % len(index))
@@ -490,11 +475,28 @@ def main():
     with open(os.path.join(SORTIE, 'demo-vide.json'), 'w', encoding='utf-8') as fichier:
         json.dump({'data': {'lists': []}}, fichier)
 
-    with open(os.path.join(SORTIE, 'vercel.json'), 'w', encoding='utf-8') as fichier:
-        json.dump({'cleanUrls': True, 'trailingSlash': False}, fichier, indent=2)
+    # Page de repli : le catalogue compte 3 965 rayons, la démo six. Les autres
+    # adresses tombent ici, et demo.js y affiche le nom du rayon demandé avec
+    # les produits de la démo. La page de recherche sert de gabarit : pleine
+    # largeur, un titre, une grille de produits, pas de colonne de filtres qui
+    # parlerait d'un autre rayon.
+    gabarit = os.path.join(SORTIE, 'recherche.html')
+    if os.path.exists(gabarit):
+        with open(gabarit, encoding='utf-8') as fichier:
+            texte = fichier.read()
+        texte = texte.replace('<head>', '<head>\n  <meta name="demo-rayon" content="1">', 1)
+        with open(os.path.join(SORTIE, 'rayon.html'), 'w', encoding='utf-8') as fichier:
+            fichier.write(texte)
+        print('rayon.html écrite')
 
-    absents = marquer_liens_absents()
-    print('Liens hors démo marqués : %s' % absents)
+    with open(os.path.join(SORTIE, 'vercel.json'), 'w', encoding='utf-8') as fichier:
+        json.dump({
+            'cleanUrls': True,
+            'trailingSlash': False,
+            # les fichiers statiques passent avant les réécritures : seules les
+            # adresses sans page atterrissent sur le gabarit de rayon
+            'rewrites': [{'source': '/(.*)', 'destination': '/rayon.html'}],
+        }, fichier, indent=2)
 
     total = 0
     for dossier, _, fichiers in os.walk(SORTIE):

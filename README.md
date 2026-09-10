@@ -126,9 +126,14 @@ Deux réglages tiennent la démo debout :
 - `vercel.json` active `cleanUrls`, qui sert `/4-jeux-de-societe` depuis
   `4-jeux-de-societe.html`. Sans lui, les adresses sans extension seraient
   téléchargées au lieu d'être affichées.
-- les liens vers les 3 965 catégories du catalogue, dont la démo ne reprend que
-  six, sont marqués à la fabrication et interceptés au clic. Le visiteur reste
-  dans la démo au lieu de tomber sur une page d'erreur.
+- une réécriture attrape-tout envoie les adresses sans page vers `rayon.html`,
+  la page de repli. Les fichiers statiques passant avant les réécritures, seuls
+  les rayons absents y arrivent. `demo.js` y affiche le nom réel du rayon
+  demandé, relevé à la fabrication sur les liens de la boutique, et le garnit
+  de produits de la démo : ceux du même rayon quand le sous-rayon y est
+  rattaché, sinon tout le catalogue de la démo. Le visiteur ne voit jamais de
+  page d'erreur, et « Stratégie & Réflexion » montre des jeux de société, pas
+  des pots de peinture.
 
 Pour une démo complète, filtres et commande comprises, il faut un serveur :
 tunnel Cloudflare depuis la machine de développement, ou un petit VPS avec le

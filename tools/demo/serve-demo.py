@@ -36,13 +36,14 @@ class Serveur(http.server.SimpleHTTPRequestHandler):
         return chemin
 
     def send_error(self, code, message=None, explain=None):
-        """Vercel sert 404.html pour toute adresse absente : on fait pareil,
-        sinon on teste en local une page d'erreur que la démo n'aura pas."""
-        page = os.path.join(DOSSIER, '404.html')
+        """Le vercel.json réécrit toute adresse sans page vers rayon.html : on
+        fait pareil, sinon on teste en local un comportement que la démo n'aura
+        pas. Les 3 965 rayons du catalogue passent par là."""
+        page = os.path.join(DOSSIER, 'rayon.html')
         if code == 404 and os.path.exists(page):
             with open(page, 'rb') as fichier:
                 corps = fichier.read()
-            self.send_response(404)
+            self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
             self.send_header('Content-Length', str(len(corps)))
             self.end_headers()

@@ -20,6 +20,7 @@
   var CLE_PANIER = 'ludik-demo-panier';
   var catalogue = null;
   var modeleCarte = '';
+  var rayons = {};
 
   /* ------------------------------------------------------------ catalogue */
 
@@ -32,6 +33,7 @@
       .then(function (donnees) {
         catalogue = donnees.articles || [];
         modeleCarte = donnees.modele || '';
+        rayons = donnees.rayons || {};
         return catalogue;
       })
       .catch(function () { catalogue = []; return catalogue; });
@@ -123,7 +125,6 @@
   }
 
   var INDISPONIBLE = 'Cette fonction demande le serveur de la boutique : elle n\'est pas active dans la démo statique.';
-  var HORS_DEMO = 'Ce rayon ne fait pas partie de la démo, qui reprend six rayons et quelques licences sur les 3 965 du catalogue.';
 
   /* ---------------------------------------------------- interception réseau */
 
@@ -230,34 +231,84 @@
     return element.outerHTML;
   }
 
-  function rendreResultats() {
-    var parametres = new URLSearchParams(window.location.search);
-    var mot = parametres.get('s') || parametres.get('search_query') || '';
-    /* la page de résultats aspirée est vide : elle porte le bloc « aucun
-       résultat » et pas de grille. On lui en rend une. */
+  function remplirGrille(articles, titre, sousTitre) {
+    /* la page de repli et la page de résultats partagent le même gabarit :
+       un en-tête, puis une grille que le serveur laisse vide */
     var liste = document.querySelector('#js-product-list');
     var grille = liste ? liste.querySelector('.products') : null;
     if (liste && !grille) {
       liste.innerHTML = '<div class="products"></div>';
       grille = liste.querySelector('.products');
     }
-    var titre = document.querySelector('.category__header h1, h1');
     if (!grille) {
       return;
     }
+    grille.innerHTML = articles.map(carte).join('');
+
+    var h1 = document.querySelector('.category__header h1, h1');
+    if (h1 && titre) {
+      h1.textContent = titre;
+    }
+    var compte = document.querySelector('.category__count');
+    if (compte && sousTitre) {
+      compte.textContent = sousTitre;
+    }
+  }
+
+  /* ------------------------------------------------------- page de repli */
+
+  function rendreRayon() {
+    var chemin = window.location.pathname.replace(/\.html$/, '');
 
     chargerCatalogue().then(function () {
+      var fiche = rayons[chemin] || {};
+      var libelle = fiche.nom || '';
+      if (!libelle) {
+        /* pas de libellé relevé : on reprend le nom de l'adresse,
+           « /122-le-webtoon » donne « Le webtoon » */
+        libelle = chemin.replace(/^\/\d*-?/, '').replace(/-/g, ' ').trim();
+        libelle = libelle ? libelle.charAt(0).toUpperCase() + libelle.slice(1) : 'Rayon';
+      }
+
+      /* Un sous-rayon de la démo est rattaché à son rayon : on n'y montre que
+         des produits de ce rayon, sinon « Stratégie & Réflexion » se garnissait
+         de pots de peinture. Ailleurs, tout le catalogue de la démo. */
+      var fonds = catalogue;
+      if (fiche.parent) {
+        var memes = catalogue.filter(function (a) { return a.rayon === fiche.parent; });
+        if (memes.length) {
+          fonds = memes;
+        }
+      }
+
+      /* une sélection stable pour une adresse donnée : deux rayons de la démo
+         ne montrent pas la même chose, et un rayon montre toujours la même */
+      var graine = 0;
+      for (var i = 0; i < chemin.length; i += 1) {
+        graine = (graine * 31 + chemin.charCodeAt(i)) % 100000;
+      }
+      var depart = fonds.length ? graine % fonds.length : 0;
+      var choix = fonds.slice(depart).concat(fonds.slice(0, depart)).slice(0, 24);
+
+      document.title = libelle + ' - Ludik.nc';
+      remplirGrille(choix, libelle, choix.length + ' produits');
+
+      var fil = document.querySelector('.breadcrumb li:last-child span, .breadcrumb li:last-child');
+      if (fil) {
+        fil.textContent = libelle;
+      }
+    });
+  }
+
+  function rendreResultats() {
+    var parametres = new URLSearchParams(window.location.search);
+    var mot = parametres.get('s') || parametres.get('search_query') || '';
+    chargerCatalogue().then(function () {
       var resultats = chercher(mot);
-      if (titre) {
-        titre.textContent = resultats.length
-          ? resultats.length + (resultats.length > 1 ? ' résultats' : ' résultat') + ' pour « ' + mot + ' »'
-          : 'Aucun résultat pour « ' + mot + ' »';
-      }
-      grille.innerHTML = resultats.map(carte).join('');
-      var compte = document.querySelector('#js-product-list-top .products__count, .products-top .products__count');
-      if (compte) {
-        compte.textContent = resultats.length + ' articles';
-      }
+      var titre = resultats.length
+        ? resultats.length + (resultats.length > 1 ? ' résultats' : ' résultat') + ' pour « ' + mot + ' »'
+        : 'Aucun résultat pour « ' + mot + ' »';
+      remplirGrille(resultats, titre, 'Indiquez un titre, une licence, un auteur ou une référence.');
     });
   }
 
@@ -305,6 +356,10 @@
 
     var chemin = window.location.pathname.replace(/\.html$/, '');
 
+    /* seule la page de repli porte cette balise */
+    if (document.querySelector('meta[name="demo-rayon"]')) {
+      rendreRayon();
+    }
     if (chemin === '/recherche') {
       rendreResultats();
     }
@@ -341,12 +396,6 @@
     /* les commandes qui ne peuvent pas répondre le disent, plutôt que de ne
        rien faire sous le doigt */
     document.addEventListener('click', function (evenement) {
-      var absent = evenement.target.closest('[data-demo-absent]');
-      if (absent) {
-        evenement.preventDefault();
-        signaler(HORS_DEMO);
-        return;
-      }
       var cible = evenement.target.closest(
         '.js-search-link, .js-pager-link, .js-search-filters-clear-all, ' +
         '[data-ps-action="add-voucher"], .checkout .btn-primary'
