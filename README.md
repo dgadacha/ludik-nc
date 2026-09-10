@@ -99,10 +99,27 @@ fichiers. C'est ce qui permet de montrer la refonte par un lien, sans PHP ni
 base de données.
 
 ```bash
-python3 tools/demo/build-demo.py            # dist/, environ 68 Mo
+python3 tools/demo/build-demo.py            # dist/, environ 70 Mo
 python3 tools/demo/serve-demo.py            # contrôle sur http://localhost:8803
+git add dist && git commit -m "Démo : nouvelle photo du catalogue" && git push
+```
+
+`dist/` est versionné, et le `vercel.json` de la racine désigne ce dossier
+comme sortie : le dépôt s'importe donc directement dans Vercel, réglages par
+défaut, et chaque push republie la démo. Si Vercel ne trouve rien à servir,
+c'est que le dossier racine du projet n'est pas la racine du dépôt : mettre
+`dist` dans « Root Directory ».
+
+Sans passer par Git, le dossier se déploie aussi seul, son propre `vercel.json`
+portant les mêmes réglages :
+
+```bash
 npx vercel deploy --prod dist
 ```
+
+Une reconstruction remplace l'intégralité du dossier : le dépôt grossit donc à
+chaque photo, l'historique gardant les précédentes. C'est le prix d'une démo
+branchée sur Git.
 
 Contenu : l'accueil, les six rayons avec leur première page de produits, 246
 fiches produit dont une sélection de licences (Pokémon, Naruto, One Piece,

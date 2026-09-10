@@ -37,5 +37,3 @@ import/boutiques/
 
 .DS_Store
 
-# démo statique fabriquée par tools/demo/build-demo.py
-dist/
