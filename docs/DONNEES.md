@@ -43,6 +43,11 @@ fonctionner la boutique. Tout ce qui figure dans la seconde partie est à valide
   L'ancien site proposait le paiement par carte ou PayPal - à rebrancher avec les
   identifiants du client.
 - 855 produits n'ont pas de visuel : l'ancien site n'en proposait pas.
+- Les boutons de partage de la fiche produit (module `ps_sharebuttons`) sont retirés :
+  Ludik n'a de présence que sur Facebook, et ces liens sortants se trouvaient à
+  l'endroit où le visiteur décide d'acheter. L'aperçu rapide des vignettes est retiré
+  aussi : il ouvrait une fenêtre qui redonne ce que la fiche donne déjà, un clic plus
+  loin. `scripts/26-retirer-partage.php` décroche le module, sans le désinstaller.
 - La page « Promotions » est retirée du site, avec sa pastille dans la barre de
   navigation et son lien dans le pied de page : le catalogue repris ne porte
   aucune remise (`ps_specific_price` est vide), la page n'affichait que

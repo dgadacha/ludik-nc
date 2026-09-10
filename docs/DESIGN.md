@@ -141,7 +141,6 @@ Chaque composant a un préfixe et un seul endroit où il est stylé.
 | Cartes de rayon | `.ludik-univers` | `ludikhome/.../home.tpl` |
 | Rangée de produits défilante | `.lud-carrousel` | `templates/components/module-products.tpl` |
 | Vignette produit | `.product-miniature` | `catalog/_partials/miniatures/product.tpl` |
-| Aperçu rapide | `.product-miniature__quickview` | `.../miniatures/product-quickview.tpl` |
 | Bouton favori | `.product-miniature__favori` | `.../miniatures/product.tpl` (module `blockwishlist`) |
 | Gabarit de liste | `.ludik-listing`, `.ludik-aside` | `templates/layouts/layout-left-column.tpl` |
 | Sections de filtre | `.lud-facet` | `ps_categorytree/...`, `ps_facetedsearch/...` |

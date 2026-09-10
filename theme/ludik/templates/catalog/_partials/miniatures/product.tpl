@@ -37,8 +37,6 @@
                  data-checked="true"
                  data-is-product="true"></div>
           </div>
-
-        {include file='catalog/_partials/miniatures/product-quickview.tpl'}
       </div>
 
       <div class="{$componentName}__bottom">

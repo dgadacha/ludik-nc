@@ -1,19 +1,13 @@
 {**
- * Aperçu rapide, au survol du visuel.
+ * Aperçu rapide : retiré du site.
  *
- * Le gabarit du thème parent rendait deux boutons - un pour la souris, un pour
- * le tactile - avec une icône Material et un libellé anglais. Un seul bouton
- * suffit : il apparaît au survol sur grand écran et reste accessible au clavier.
+ * La vignette n'inclut plus ce gabarit, mais celui du thème parent l'inclut
+ * encore depuis ses propres rendus de vignette. Le fichier reste donc en place
+ * avec ses deux blocs vides : sans lui, c'est la version du parent qui
+ * ressortirait, avec ses deux boutons et ses libellés anglais.
+ *
+ * Pour le remettre : rétablir l'include dans miniatures/product.tpl et le bloc
+ * .product-miniature__quickview dans custom.css (voir l'historique git).
  *}
-{block name='quick_view'}
-  <button type="button"
-          class="{$componentName}__quickview js-quickview"
-          data-ps-action="open-quickview"
-          data-ps-ref="quickview-button"
-          aria-label="Aperçu rapide de {$product.name|escape:'html':'UTF-8'}">
-    <svg class="lud-i lud-i--sm" aria-hidden="true"><use href="#i-zoom-in"></use></svg>
-    <span class="{$componentName}__quickview-label">Aperçu rapide</span>
-  </button>
-{/block}
-
+{block name='quick_view'}{/block}
 {block name='quick_view_touch'}{/block}

@@ -80,6 +80,7 @@ docker exec ludik-ps php /scripts/22-purge-demo.php --yes        # commandes de 
 docker exec ludik-ps php /scripts/23-coordonnees-boutiques.php   # téléphones des boutiques
 docker exec ludik-ps php /scripts/24-horaires-boutiques.php      # horaires des boutiques
 docker exec ludik-ps php /scripts/25-retirer-promotions.php      # retrait de la page Promotions
+docker exec ludik-ps php /scripts/26-retirer-partage.php         # retrait des boutons de partage
 ```
 
 Les vignettes se génèrent ensuite en parallèle, environ trois minutes :
