@@ -1,0 +1,13 @@
+# Ce dépôt n'a qu'un dossier à déployer, dist/, fabriqué par
+# tools/demo/build-demo.py. Le reste est la recette de la boutique, pas un
+# site : sans cette liste, un déploiement lancé depuis la racine emporte les
+# 32 000 visuels du crawl et dépasse la limite de 15 000 fichiers de Vercel.
+import/
+theme/
+modules/
+scripts/
+tools/
+docs/
+docker-compose.yml
+README.md
+.rollback-*/
